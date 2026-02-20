@@ -13,6 +13,8 @@ The system is intentionally designed to not rely entirely on an AI model. While 
 - When users are unsure, AI can optionally assist by suggesting options, criteria, or provisional scores.
 - Users always retain control and can manually override or provide inputs at any stage.
 - All final rankings are produced using deterministic logic, regardless of whether AI assistance was used earlier.
+- Ratings are normalized on a fixed 1–10 scale, where higher values always indicate better performance. Cost-based criteria 
+- Cost-based criteria such as price are evaluated in terms of value for money, not raw cost.
 
 ## Why the Solution Is Structured This Way
 The solution is structured around a weighted decision-making approach. Each option is evaluated against multiple criteria, where:
@@ -53,23 +55,24 @@ ratings: dict[str, dict[str, float]] # option -> criterion -> score
 All these cases are validated explicitly to prevent incorrect or misleading results.
 
 ## How to Run the Project
-The initial version of Decision Lens is implemented as a CLI-based Python application.
+The project is a dynamic CLI-based Python application that guides you through the decision-making process.
 
 **Basic steps:**
 1. Clone the repository
-2. Install dependencies (if any)
-3. Run the main Python script via the command line:
+2. Run the main Python script:
    ```bash
    python src/main.py
    ```
-
-This choice was made to prioritize clarity of logic and ease of testing over UI complexity.
+3. **Interactive Process:**
+   - **Input Options:** List the items you are choosing between (e.g., Laptop A, Laptop B).
+   - **Input Criteria:** Define what matters to you (e.g., Price, Performance).
+   - **Assign Weights:** Enter a positive number for each criterion. The system automatically normalizes these so they sum to 1, allowing you to focus on relative importance.
+   - **Rate Options:** Provide a score from 1 to 10 for each option across all criteria.
 
 ## What I Would Improve With More Time
-This project represents an initial, functional version of the system. With more time, improvements could include:
-- A richer CLI or web-based UI
-- More robust normalization strategies for ratings
-- Better user interaction for reviewing AI-suggested inputs
-- Support for saving and revisiting past decisions
-- Visualization of trade-offs and score breakdowns
-- Additional decision models beyond weighted scoring
+While the system now supports dynamic user input, further improvements could include:
+- Integration with LLMs for AI-assisted criteria and option discovery.
+- Persistence layer to save and compare different decision sessions.
+- Data visualization (e.g., bar charts or radar charts) for better comparison.
+- Robust error handling for edge-case CLI inputs.
+- Migration to a web-based interface for better accessibility.

@@ -1,26 +1,27 @@
 from core.decision_engine import compute_weighted_scores
 from core.validation import validate_weights, validate_ratings
+from utils.input_helpers import get_list_from_user, get_weights, get_ratings
 
-options = ["Laptop A", "Laptop B", "Laptop C"]
-criteria = ["Price", "Performance", "Battery"]
+def main():
+    options = get_list_from_user("Enter your options:")
+    criteria = get_list_from_user("Enter evaluation criteria:")
 
-weights = {
-    "Price": 0.3,
-    "Performance": 0.4,
-    "Battery": 0.3
-}
+    if not options or not criteria:
+        print("Options and criteria cannot be empty.")
+        return
 
-ratings = {
-    "Laptop A": {"Price": 8, "Performance": 6, "Battery": 7},
-    "Laptop B": {"Price": 6, "Performance": 9, "Battery": 8},
-    "Laptop C": {"Price": 9, "Performance": 5, "Battery": 6}
-}
+    weights = get_weights(criteria)
+    ratings = get_ratings(options, criteria)
 
-assert validate_weights(weights)
-assert validate_ratings(options, criteria, ratings)
+    if not validate_ratings(options, criteria, ratings):
+        print("Invalid ratings provided.")
+        return
 
-results = compute_weighted_scores(options, criteria, weights, ratings)
+    results = compute_weighted_scores(options, criteria, weights, ratings)
 
-print("Ranked Results:")
-for option, score in results.items():
-    print(option, score)
+    print("\nRanked Results:")
+    for option, score in results.items():
+        print(f"{option}: {score}")
+
+if __name__ == "__main__":
+    main()

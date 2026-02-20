@@ -14,9 +14,10 @@
 - **Architecture:** Modular Python package with a clear separation between the entry point (`src/main.py`) and core logic (`src/core/`).
 
 ## Architecture & Data Structures
-- `src/main.py`: Entry point. Currently uses static inputs for demonstration.
+- `src/main.py`: Entry point. Orchestrates dynamic user input and core engine.
 - `src/core/decision_engine.py`: Implements `compute_weighted_scores`.
-- `src/core/validation.py`: Handles input validation (weights sum to 1, all ratings present).
+- `src/core/validation.py`: Handles input validation.
+- `src/utils/input_helpers.py`: Provides helper functions for interactive CLI input gathering.
 
 ### Data Schema
 - `options`: `list[str]`
@@ -27,7 +28,7 @@
 ## Building and Running
 
 ### Execution
-Run the current prototype:
+Run the interactive CLI:
 ```bash
 python src/main.py
 ```
@@ -42,6 +43,7 @@ python src/main.py
 - **No External Dependencies:** Keep the core system lightweight using Python's standard library unless explicitly required.
 
 ## Roadmap
-- Transition to dynamic CLI inputs.
-- Integrate AI-assisted input gathering.
-- Add visualization for score breakdowns.
+- [x] Transition to dynamic CLI inputs.
+- [ ] Integrate AI-assisted input gathering (criteria/option suggestions).
+- [ ] Add visualization for score breakdowns.
+- [ ] Add `pytest` test suite.
