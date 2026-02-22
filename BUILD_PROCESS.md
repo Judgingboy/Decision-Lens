@@ -17,78 +17,106 @@ Initially, a chatbot-style interface was considered. However, this was rejected 
 ## Phase 3: Transition to Dynamic CLI
 After validating the core engine, the focus shifted toward building a dynamic CLI-based system that allows real user input.
 
-Key Implementations
-Interactive Input Layer: Created src/utils/input_helpers.py to collect options and criteria dynamically.
-Dynamic Weighting: Allowed users to express importance, which the system normalized so that weights always sum to 1.
-Validation Layer: Added checks in src/core/validation.py to ensure completeness and consistency of inputs.
+### Key Implementations
+- **Interactive Input Layer:** Created `src/utils/input_helpers.py` to collect options and criteria dynamically.
+- **Dynamic Weighting:** Allowed users to express importance, which the system normalized so that weights always sum to 1.
+- **Validation Layer:** Added checks in `src/core/validation.py` to ensure completeness and consistency of inputs.
+
 At this stage, the system became fully dynamic and runnable end-to-end.
 
 ## Phase 4: Critical Usability & Model Flaw Discovery
-During real-world testing, two major issues were identified:
 
-### Cost vs Benefit Criteria Problem
-- The system treated all criteria as if “higher values are better.”
-- This caused incorrect behavior for cost-based criteria (e.g., price), where lower values should be preferred.
-- Although criteria were labeled as cost or benefit, this information was not yet used in normalization and scoring.
+During real-world testing and iterative use, the system exposed fundamental modeling and usability flaws. These issues were not implementation bugs but structural problems in how decisions were being represented and evaluated.
 
-### User Cognitive Overload
-The system required users to:
-1. Rank criteria by importance.
-2. Manually rate each option on a 1–10 scale for every criterion.
+### Cost vs Benefit Criteria Misinterpretation
 
-Testing revealed that this dual input model was unintuitive, error-prone, and unrealistic for average users. Users struggled to:
-- Translate real-world facts into abstract scores.
-- Understand how ratings interacted with priorities.
+The initial scoring logic implicitly treated all criteria as “higher is better.”
+
+- This caused incorrect behavior for cost-based criteria (e.g., price, time, effort), where lower values should be preferred.
+- Although criteria were labeled as cost or benefit at input time, this distinction was not properly integrated into normalization and scoring logic.
+- As a result, the model could produce rankings that directly contradicted user intent.
+
+This revealed that correct handling of cost vs benefit is not a UX concern but a core mathematical requirement of any decision model.
+
+### User Cognitive Overload & Input Model Breakdown
+
+The original interaction model required users to:
+- Rank criteria by importance.
+- Manually rate every option on a 1–10 scale for every criterion.
+
+Testing showed this dual-input requirement to be unintuitive, error-prone, and cognitively unrealistic for most users.
+
+Users consistently struggled to:
+- Translate real-world facts into abstract numeric ratings.
+- Understand how ratings interacted with priority weights.
 - Predict or trust the resulting rankings.
 
-This led to confusing and counterintuitive outcomes, even when user intent was clear. These issues were not simple bugs but fundamental modeling and UX flaws.
+Even when user intent was clear, outcomes often felt confusing or counterintuitive.
+This demonstrated that the problem was not user error, but a flawed assumption that humans can reliably perform normalization and scoring tasks.
 
-## Phase 5: Revised Model – AI-Assisted Structuring (Current Direction)
-To resolve these issues, the system design was revised.
+## Phase 5: Revised Model — AI-Assisted Structuring (Current Direction)
+
+Based on the findings in Phase 4, the system architecture and interaction model were revised.
 
 ### Key Insight
-**Users should express intent and facts, not perform normalization or scoring themselves.**
+- Users should express intent and factual information — not perform normalization, inversion, or scoring themselves.
+- Normalization and trade-off math are system responsibilities, not human ones.
 
-### Revised Approach
-**Users:**
-- Define options.
-- Define criteria.
+### Revised Interaction Model
+
+**Users now:**
+- Define decision options.
+- Define evaluation criteria.
 - Rank criteria by importance.
-- Describe option attributes in natural language or factual terms.
+- Describe option attributes using natural language or factual terms.
 
-**The System:**
-- Classifies criteria as cost or benefit.
-- Normalizes numeric and categorical attributes.
-- Applies weights deterministically.
-- Produces a ranked outcome.
+**The system now:**
+- Explicitly classifies criteria as cost or benefit.
+- Normalizes attributes across options in a scale-independent manner.
+- Applies user-defined weights deterministically.
+- Produces a ranked outcome based on transparent calculations.
 
-### Role of AI
-AI is introduced only to:
-- Interpret unstructured or vague user descriptions.
-- Convert them into structured, comparable attributes.
-- Assist users when they are unsure how to describe options or criteria.
+This preserves user control over priorities while removing unnecessary cognitive burden.
 
-AI does **not**:
-- Apply weights.
+### Role of AI in the Revised Model
+
+AI is introduced only as an assistive structuring layer, not as a decision-maker.
+
+**AI is used to:**
+- Interpret vague or unstructured user descriptions.
+- Convert natural language into structured, comparable attributes.
+- Assist users when they are unsure how to define options or criteria.
+
+**AI explicitly does not:**
+- Assign weights.
 - Rank options.
+- Override user priorities.
 - Make final decisions.
 
-This preserves explainability while significantly improving usability and correctness.
+All decision logic remains deterministic and auditable.
 
-## Current State
-The system is now a fully functional, dynamic CLI-based Decision Companion System.
-- Core Engine: Deterministic, explainable weighted scoring
-- Architecture: Modular separation between core logic and input/assistance layers
-- Decision Control: Fully user-driven priorities with system-managed normalization
-- AI Role: Assistive interpretation, not decision-making
+### Current State of the System
 
-- **Recent Update:** Logic added to distinguish between "Benefit" (higher is better) and "Cost" (lower is better) criteria.
-- **Modular Architecture:** The codebase is partitioned into `core` (engine/validation) and `utils` (UI/input).
-- **Transparency:** Every ranking is auditable and based directly on user-provided scores and weights.
-- **Human-in-the-Loop:** Users retain full control over the inputs, with the system acting as a supportive analytical tool.
+The system is now a functional, CLI-based Decision Companion System with a clear separation of responsibilities.
 
-## Future Roadmap
-- **AI-Assisted Gathering:** Integrating LLMs to suggest criteria or options when users are "stuck."
-- **Persistence:** Adding the ability to save, export, and revisit past decision matrices.
-- **Enhanced Visualization:** Implementing graphical score breakdowns and trade-off visualizations.
-- **Testing Suite:** Expanding the inline assertions into a comprehensive `pytest` suite.
+#### Core Characteristics
+- **Core Engine:** Deterministic, explainable weighted scoring model.
+- **Normalization:** Proper handling of cost (lower is better) and benefit (higher is better) criteria.
+- **Architecture:** Modular separation between:
+    - `core` — decision engine and validation logic
+    - `utils` — user input and interaction helpers
+- **Decision Control:** User-defined priorities with system-managed normalization.
+- **AI Role:** Assistive interpretation only; no black-box decision-making.
+
+#### Recent Technical Updates
+- Implemented normalization logic that correctly distinguishes between cost and benefit criteria.
+- Removed reliance on fixed rating-scale inversion.
+- Improved mathematical validity and interpretability of trade-offs.
+- Maintained full transparency: every score can be traced back to user inputs and deterministic rules.
+- Preserved a human-in-the-loop workflow where users retain full control over intent and priorities.
+
+### Future Roadmap
+- **AI-Assisted Structuring:** Integrate LLMs to suggest criteria or options when users are uncertain or “stuck.”
+- **Persistence:** Enable saving, exporting, and revisiting past decision analyses.
+- **Visualization:** Add graphical breakdowns of scores and trade-offs for deeper insight.
+- **Testing:** Expand inline validation into a comprehensive `pytest` test suite.

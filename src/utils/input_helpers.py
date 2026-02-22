@@ -74,24 +74,24 @@ def get_weights_from_ranking(criteria):
 
 
 
-def get_ratings(options, criteria):
-    ratings = {}
-    print("\nRate each option for each criterion (1–10):")
+# def get_ratings(options, criteria):    #Depreciated in favor of more structured input methods
+#     ratings = {}
+#     print("\nRate each option for each criterion (1–10):")
 
-    for option in options:
-        print(f"\nOption: {option}")
-        ratings[option] = {}
+#     for option in options:
+#         print(f"\nOption: {option}")
+#         ratings[option] = {}
 
-        for criterion in criteria:
-            while True:
-                try:
-                    score = float(input(f"  {criterion}: "))
-                    if 1 <= score <= 10:
-                        ratings[option][criterion] = score
-                        break
-                    else:
-                        print("Score must be between 1 and 10.")
-                except ValueError:
-                    print("Please enter a number.")
+#         for criterion in criteria:
+#             while True:
+#                 try:
+#                     score = float(input(f"  {criterion}: "))
+#                     if 1 <= score <= 10:
+#                         ratings[option][criterion] = score
+#                         break
+#                     else:
+#                         print("Score must be between 1 and 10.")
+#                 except ValueError:
+#                     print("Please enter a number.")
 
-    return ratings
+#     return ratings

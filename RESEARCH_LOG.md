@@ -5,6 +5,16 @@
 ### Prompts Used
 - "What is a Decision Companion System?"
 - "What would be a real life example?"
+- "How to responsibly integrate LLMs into decision systems?"
+- "At the core what do they mean by a decision companion system?"
+- "What would be a real life example of a decision companion system?"
+- "Are they referring to a chatbot with inputs and constraints?"
+- "Are LLMs required for this assignment?"
+- "How is it possible to build this without AI?"
+- "If AI is used, how should it be justified and limited?"
+- "How to collect options and criteria dynamically from the user?"
+- "How to normalize weights so that they sum to 1?"
+- "How should ratings be handled in a weighted scoring system?"
 - "Like i need to make this before March 2nd and i don't know how to tackle this question"
 - "Okk so Are they reffering to a chat bot? with inputs and constraints given to it?"
 - "I have a simple doubt for this LLM's should be used right?"
@@ -64,16 +74,7 @@
 - "right now as the UI is confusing as hell."
 - "Option: Laptop A (₹42k, i3, 8GB RAM)"
 - "This is the headache.. Ill tell you two major flaws in this. 1.I've already given the priority but its again asking for ratings.. No user understands how to enter rating from 1 to 10. So either get rid of that or make a workaround from the priority or we'll make ai do that for the user. That itself is confusing af. 2. The final list is absolutely wrong. it just put the priciest laptop on top"
-- "How to responsibly integrate LLMs into decision systems?"
-- "At the core what do they mean by a decision companion system?"
-- "What would be a real life example of a decision companion system?"
-- "Are they referring to a chatbot with inputs and constraints?"
-- "Are LLMs required for this assignment?"
-- "How is it possible to build this without AI?"
-- "If AI is used, how should it be justified and limited?"
-- "How to collect options and criteria dynamically from the user?"
-- "How to normalize weights so that they sum to 1?"
-- "How should ratings be handled in a weighted scoring system?"
+
 
 AI responses were used primarily to:
 - Clarify the concept of decision companion systems
@@ -91,12 +92,15 @@ AI was not used to generate decision logic or rankings.
 - "How to normalize weights so they sum to 1"
 - "Python data structures for decision making"
 - "Benefit vs cost criteria in decision models"
+- "how do i update all npm packages"
+
+
 
 ## References
 - Weighted Scoring Model (general decision theory concept)
 - Decision Matrix Method
 - Basic decision support system design principles
-
+- "https://www.youtube.com/watch?v=J3y1dOpz9R4" was used to for OPEN AI API Key reference 
 ## Accepted vs Rejected Ideas
 
 ### Accepted
@@ -111,3 +115,4 @@ AI was not used to generate decision logic or rankings.
 - Fully AI-driven decision making
 - Chatbot-only interfaces
 - Black-box scoring mechanisms
+- In the inital phase i had a rating-Based Weighted Sum Mode, that architecture worked mechnically, but it violated my own design principles
