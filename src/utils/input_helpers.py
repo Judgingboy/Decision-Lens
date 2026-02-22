@@ -12,27 +12,66 @@ def get_list_from_user(prompt):
 
     return items
 
+def get_criteria_from_user(prompt):
+    criteria = []
+    criteria_types = {}
 
-def get_weights(criteria):
-    raw_weights = {}
-    print("\nEnter importance for each criterion (any positive number):")
+    print(prompt)
+    print("Type 'done' when finished.\n")
+
+    while True:
+        criterion = input("> ").strip()
+        if criterion.lower() == "done":
+            break
+        if not criterion:
+            continue
+
+        criteria.append(criterion)
+
+        while True:
+            ctype = input(
+                f'Is "{criterion}" a benefit or cost? (b = benefit, c = cost): '
+            ).lower()
+
+            if ctype == "b":
+                criteria_types[criterion] = "benefit"
+                break
+            elif ctype == "c":
+                criteria_types[criterion] = "cost"
+                break
+            else:
+                print("Please enter 'b' or 'c'.")
+
+    return criteria, criteria_types
+
+
+def get_weights_from_ranking(criteria):
+    rankings = {}
+    print("\nRank criteria by importance (1 = highest priority):")
 
     for criterion in criteria:
         while True:
             try:
-                value = float(input(f"{criterion}: "))
-                if value > 0:
-                    raw_weights[criterion] = value
+                rank = int(input(f"{criterion}: "))
+                if 1 <= rank <= len(criteria):
+                    rankings[criterion] = rank
                     break
                 else:
-                    print("Weight must be positive.")
+                    print(f"Enter a number between 1 and {len(criteria)}.")
             except ValueError:
-                print("Please enter a number.")
+                print("Please enter a valid integer.")
+
+    max_rank = len(criteria)
+    raw_weights = {
+        c: (max_rank + 1) - r
+        for c, r in rankings.items()
+    }
 
     total = sum(raw_weights.values())
-    weights = {k: v / total for k, v in raw_weights.items()}
+    weights = {c: w / total for c, w in raw_weights.items()}
 
     return weights
+
 
 
 def get_ratings(options, criteria):

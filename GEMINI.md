@@ -8,6 +8,7 @@
 - **Explainability:** Users can audit exactly why an option ranks higher.
 - **Human-in-the-Loop:** Users retain full control and can override inputs at any stage.
 - **Optional AI:** AI is strictly assistive (e.g., suggesting criteria/options) and does not handle the core scoring.
+- **Focus on User Intent:** The system is designed for users to express their intent and facts, rather than performing complex normalization and scoring themselves.
 
 ### Key Technologies
 - **Language:** Python 3 (standard library)
@@ -15,13 +16,14 @@
 
 ## Architecture & Data Structures
 - `src/main.py`: Entry point. Orchestrates dynamic user input and core engine.
-- `src/core/decision_engine.py`: Implements `compute_weighted_scores`.
-- `src/core/validation.py`: Handles input validation.
-- `src/utils/input_helpers.py`: Provides helper functions for interactive CLI input gathering.
+- `src/core/decision_engine.py`: Implements `compute_weighted_scores`, which now handles both "benefit" (higher is better) and "cost" (lower is better) criteria.
+- `src/core/validation.py`: Handles input validation for weights and ratings.
+- `src/utils/input_helpers.py`: Provides helper functions for interactive CLI input gathering, including capturing criteria types (cost/benefit) and ranking-based weights.
 
 ### Data Schema
 - `options`: `list[str]`
 - `criteria`: `list[str]`
+- `criteria_types`: `dict[str, str]` (Maps criterion to its type: 'cost' or 'benefit')
 - `weights`: `dict[str, float]` (Maps criterion to importance weight)
 - `ratings`: `dict[str, dict[str, float]]` (Maps option to a dictionary of criterion scores)
 
@@ -34,8 +36,8 @@ python src/main.py
 ```
 
 ### Testing
-- Currently uses inline `assert` statements.
-- TODO: Implement `pytest` for comprehensive coverage.
+- Currently uses inline `assert` statements in the validation functions.
+- TODO: Implement `pytest` for comprehensive test coverage.
 
 ## Development Conventions
 - **Functional Logic:** Core logic should remain pure and deterministic.
@@ -44,6 +46,8 @@ python src/main.py
 
 ## Roadmap
 - [x] Transition to dynamic CLI inputs.
-- [ ] Integrate AI-assisted input gathering (criteria/option suggestions).
-- [ ] Add visualization for score breakdowns.
-- [ ] Add `pytest` test suite.
+- [ ] Integrate AI-assisted input structuring (helping users translate qualitative descriptions into quantitative ratings).
+- [ ] Add a persistence layer to save and compare different decision sessions.
+- [ ] Add visualization for score breakdowns and trade-off analysis.
+- [ ] Implement a comprehensive `pytest` test suite.
+- [ ] Explore a web-based interface for improved accessibility.
