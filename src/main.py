@@ -32,8 +32,13 @@
 
 """"Testing Version of main.py - not fully implemented yet"""
 
+import os
+from dotenv import load_dotenv
 from core.decision_engine import compute_weighted_scores
 from utils.input_helpers import get_list_from_user, get_criteria_from_user, get_weights_from_ranking
+
+# Load environment variables (API keys)
+load_dotenv()
 
 def main():
     options = get_list_from_user("Enter your options:")
