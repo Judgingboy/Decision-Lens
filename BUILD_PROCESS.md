@@ -56,25 +56,78 @@ This demonstrated that the problem was not user error, but a flawed assumption t
 
 ## Phase 5: Revised Model — AI-Assisted Structuring (Current Direction)
 
-Based on the findings in Phase 4, the system architecture and interaction model were revised.
+> Users should express intent and facts, not perform scoring or normalization.
+
+### Revised Architecture
+
+The system is now divided into three clearly defined layers:
+
+1.  **Structure Agent (AI-Assisted)**
+    - Converts natural language input into structured data.
+    - **Extracts:**
+        - Options
+        - Criteria
+        - Cost vs benefit classification
+        - Option attributes (numeric or descriptive)
+    - **Emits** ordinal scales for descriptive criteria.
+    - **Marks** missing information explicitly.
+    - **Does not:**
+        - Score, rank, or assign weights.
+
+2.  **Core Decision Engine (Deterministic)**
+    - Converts ordinal descriptors to numeric values.
+    - Accepts raw numeric attributes directly.
+    - Normalizes values across options.
+    - Applies user-defined criterion weights.
+    - Correctly handles cost vs benefit criteria.
+    - Produces ranked results.
+    - No AI is used in this layer.
+
+3.  **Explanation Agent (Optional AI)**
+    - Explains rankings using engine outputs.
+    - Highlights trade-offs based on user priorities.
+    - **Does not** recalculate or override results.
+
+### Attribute Model
+
+The system supports:
+-   Numeric attributes (e.g., price, calories, protein)
+-   Ordinal attributes (e.g., cheap → expensive, low → high)
+
+Ordinal scales are explicit and decision-specific.
+
+### Missing-Data Policy
+
+If an option lacks data for a criterion:
+-   That criterion is excluded for the option.
+-   Remaining weights are re-normalized.
+
+This avoids penalizing uncertainty or encouraging guesses.
+
+### Outcome
+
+The revised model:
+-   Removes arbitrary 1–10 ratings
+-   Reduces user effort
+-   Remains fully explainable and deterministic
+-   Works across multiple decision domains
 
 ### Key Insight
-- Users should express intent and factual information — not perform normalization, inversion, or scoring themselves.
-- Normalization and trade-off math are system responsibilities, not human ones.
+> Users should express intent and factual information — not perform normalization, inversion, or scoring themselves. Normalization and trade-off math are system responsibilities, not human ones.
 
 ### Revised Interaction Model
 
 **Users now:**
-- Define decision options.
-- Define evaluation criteria.
-- Rank criteria by importance.
-- Describe option attributes using natural language or factual terms.
+-   Define decision options.
+-   Define evaluation criteria.
+-   Rank criteria by importance.
+-   Describe option attributes using natural language or factual terms.
 
 **The system now:**
-- Explicitly classifies criteria as cost or benefit.
-- Normalizes attributes across options in a scale-independent manner.
-- Applies user-defined weights deterministically.
-- Produces a ranked outcome based on transparent calculations.
+-   Explicitly classifies criteria as cost or benefit.
+-   Normalizes attributes across options in a scale-independent manner.
+-   Applies user-defined weights deterministically.
+-   Produces a ranked outcome based on transparent calculations.
 
 This preserves user control over priorities while removing unnecessary cognitive burden.
 
@@ -83,15 +136,15 @@ This preserves user control over priorities while removing unnecessary cognitive
 AI is introduced only as an assistive structuring layer, not as a decision-maker.
 
 **AI is used to:**
-- Interpret vague or unstructured user descriptions.
-- Convert natural language into structured, comparable attributes.
-- Assist users when they are unsure how to define options or criteria.
+-   Interpret vague or unstructured user descriptions.
+-   Convert natural language into structured, comparable attributes.
+-   Assist users when they are unsure how to define options or criteria.
 
 **AI explicitly does not:**
-- Assign weights.
-- Rank options.
-- Override user priorities.
-- Make final decisions.
+-   Assign weights.
+-   Rank options.
+-   Override user priorities.
+-   Make final decisions.
 
 All decision logic remains deterministic and auditable.
 
@@ -100,23 +153,23 @@ All decision logic remains deterministic and auditable.
 The system is now a functional, CLI-based Decision Companion System with a clear separation of responsibilities.
 
 #### Core Characteristics
-- **Core Engine:** Deterministic, explainable weighted scoring model.
-- **Normalization:** Proper handling of cost (lower is better) and benefit (higher is better) criteria.
-- **Architecture:** Modular separation between:
-    - `core` — decision engine and validation logic
-    - `utils` — user input and interaction helpers
-- **Decision Control:** User-defined priorities with system-managed normalization.
-- **AI Role:** Assistive interpretation only; no black-box decision-making.
+-   **Core Engine:** Deterministic, explainable weighted scoring model.
+-   **Normalization:** Proper handling of cost (lower is better) and benefit (higher is better) criteria.
+-   **Architecture:** Modular separation between:
+    -   `core` — decision engine and validation logic
+    -   `utils` — user input and interaction helpers
+-   **Decision Control:** User-defined priorities with system-managed normalization.
+-   **AI Role:** Assistive interpretation only; no black-box decision-making.
 
 #### Recent Technical Updates
-- Implemented normalization logic that correctly distinguishes between cost and benefit criteria.
-- Removed reliance on fixed rating-scale inversion.
-- Improved mathematical validity and interpretability of trade-offs.
-- Maintained full transparency: every score can be traced back to user inputs and deterministic rules.
-- Preserved a human-in-the-loop workflow where users retain full control over intent and priorities.
+-   Implemented normalization logic that correctly distinguishes between cost and benefit criteria.
+-   Removed reliance on fixed rating-scale inversion.
+-   Improved mathematical validity and interpretability of trade-offs.
+-   Maintained full transparency: every score can be traced back to user inputs and deterministic rules.
+-   Preserved a human-in-the-loop workflow where users retain full control over intent and priorities.
 
 ### Future Roadmap
-- **AI-Assisted Structuring:** Integrate LLMs to suggest criteria or options when users are uncertain or “stuck.”
-- **Persistence:** Enable saving, exporting, and revisiting past decision analyses.
-- **Visualization:** Add graphical breakdowns of scores and trade-offs for deeper insight.
-- **Testing:** Expand inline validation into a comprehensive `pytest` test suite.
+-   **AI-Assisted Structuring:** Integrate LLMs to suggest criteria or options when users are uncertain or “stuck.”
+-   **Persistence:** Enable saving, exporting, and revisiting past decision analyses.
+-   **Visualization:** Add graphical breakdowns of scores and trade-offs for deeper insight.
+-   **Testing:** Expand inline validation into a comprehensive `pytest` test suite.

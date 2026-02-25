@@ -1,0 +1,33 @@
+User
+ ↓
+Structure Agent
+  - criteria
+  - cost/benefit
+  - ordinal scales
+  - numeric facts
+ ↓
+Attribute Mapper
+  - descriptors → ordinals
+  - numbers pass through
+ ↓
+Decision Engine
+  - normalization
+  - weighting
+  - ranking
+ ↓
+Explanation Agent
+
+
+
+
+User (natural language)
+   ↓
+Structure Agent (draft structure)
+   ↓
+User confirmation / edits  ← NEW STEP
+   ↓
+Confirmed structure
+   ↓
+Attribute mapping
+   ↓
+Decision engine
