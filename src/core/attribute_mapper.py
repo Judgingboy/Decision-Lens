@@ -1,3 +1,4 @@
+from utils.normalization import normalize_key
 def normalize_text(value: str) -> str:
     return value.strip().lower()
 
@@ -10,40 +11,47 @@ def map_attributes(structured_data: dict) -> dict:
 
     criteria = structured_data.get("criteria", {})
     options = structured_data.get("options", {})
+    # Normalize criteria keys ONCE
+    normalized_criteria = {
+        normalize_key(k): v for k, v in criteria.items()
+    }
 
     mapped = {}
 
     for option, attrs in options.items():
         mapped[option] = {}
 
-        for criterion, raw_value in attrs.items():
-            c_key = normalize_text(criterion.replace("_", " "))
+        for raw_criterion, raw_value in attrs.items():
+            c_key = normalize_key(raw_criterion)
 
             # Unknown stays unknown
             if raw_value == "unknown":
-                mapped[option][criterion] = None
+                mapped[option][c_key] = None
                 continue
 
-            # Numeric values pass through directly
+            meta = normalized_criteria.get(c_key)
+            if not meta:
+                mapped[option][c_key] = None
+                continue
+
+            # Numeric values pass through
             if isinstance(raw_value, (int, float)):
-                mapped[option][criterion] = raw_value
+                mapped[option][c_key] = raw_value
                 continue
 
-            # Ordinal descriptor handling
-            scale = criteria.get(c_key, {}).get("scale")
-
+            # Ordinal mapping
+            scale = meta.get("scale")
             if not scale:
-                mapped[option][criterion] = None
+                mapped[option][c_key] = None
                 continue
 
-            scale_normalized = [normalize_text(s) for s in scale]
-            value_key = normalize_text(str(raw_value))
+            scale_norm = [normalize_key(s) for s in scale]
+            value_norm = normalize_key(str(raw_value))
 
-            if value_key not in scale_normalized:
-                mapped[option][criterion] = None
+            if value_norm not in scale_norm:
+                mapped[option][c_key] = None
                 continue
 
-            # Ordinal rank (1-based)
-            mapped[option][criterion] = scale_normalized.index(value_key) + 1
+            mapped[option][c_key] = scale_norm.index(value_norm) + 1
 
     return mapped

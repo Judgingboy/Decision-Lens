@@ -1,16 +1,32 @@
-def get_list_from_user(prompt):
-    items = []
+from utils.normalization import normalize_key
+
+def get_multiline_input(prompt: str, end_token: str = "done") -> str:
     print(prompt)
-    print("Type 'done' when finished.\n")
+    print(f"Type '{end_token}' on a new line when finished.\n")
+
+    lines = []
 
     while True:
-        value = input("> ").strip()
-        if value.lower() == "done":
+        line = input("> ")
+        if line.strip().lower() == end_token:
             break
-        if value:
-            items.append(value)
+        lines.append(line)
 
-    return items
+    return "\n".join(lines)
+
+# def get_list_from_user(prompt):  #Depreciated in favor of more structured input methods
+#     items = []
+#     print(prompt)
+#     print("Type 'done' when finished.\n")
+
+#     while True:
+#         value = input("> ").strip()
+#         if value.lower() == "done":
+#             break
+#         if value:
+#             items.append(value)
+
+#     return items
 
 def get_criteria_from_user(prompt):
     criteria = []
@@ -75,8 +91,10 @@ def get_weights_from_ranking(criteria):
 def confirm_criteria_types(criteria):
     print("\nConfirm criteria types:")
 
-    for i, (c, meta) in enumerate(criteria.items(), start=1):
-        print(f"{i}. {c} → {meta['type']}")
+    keys = list(criteria.keys())
+
+    for i, c in enumerate(keys, start=1):
+        print(f"{i}. {c} → {criteria[c]['type']}")
 
     while True:
         choice = input(
@@ -90,51 +108,135 @@ def confirm_criteria_types(criteria):
             continue
 
         idx = int(choice) - 1
-        if idx < 0 or idx >= len(criteria):
+        if idx < 0 or idx >= len(keys):
             continue
 
-        key = list(criteria.keys())[idx]
+        key = keys[idx]
         current = criteria[key]["type"]
         criteria[key]["type"] = "benefit" if current == "cost" else "cost"
 
         print(f"{key} set to {criteria[key]['type']}")
 
-    return criteria
+    # Normalize keys BEFORE returning
+    return {
+        normalize_key(k): v for k, v in criteria.items()
+    }
 
 def confirm_ordinal_scales(criteria):
     """
     Allows the user to confirm or edit ordinal scales suggested by the Structure Agent.
     """
+    normalized = {}
 
-    for criterion, meta in criteria.items():
+    for raw_key, meta in criteria.items():
+        key = normalize_key(raw_key)
+        normalized[key] = meta
+
         scale = meta.get("scale")
-
-        # Skip criteria without ordinal scales (numeric-only)
+        #skip criteria without scales (numeric or unknown)
         if not scale:
             continue
 
-        print(f"\nCriterion: {criterion}")
-        print("Proposed scale (lowest → highest):")
+        print("\nCriterion:", raw_key)
+        print("Proposed order (worst → best):")
+        for i, v in enumerate(scale, start=1):
+            print(f"{i}. {v}")
 
-        for i, value in enumerate(scale, start=1):
-            print(f"{i}. {value}")
-
-        choice = input("Is this scale correct? (y/n): ").strip().lower()
-
+        print(
+            "\nThis order defines what is considered better for comparison."
+        )
+        choice = input("Is this order correct for you? (y/n): ").strip().lower()
         if choice == "y":
             continue
-
-        # User wants to edit
+        # If not correct, allow user to input a new scale
         new_scale = input(
             "Enter corrected scale (comma-separated, lowest → highest): "
         ).strip()
 
         if new_scale:
-            meta["scale"] = [s.strip() for s in new_scale.split(",")]
+            normalized[key]["scale"] = [
+                s.strip() for s in new_scale.split(",")
+            ]
+
+    return normalized
+
+def confirm_options(options: dict) -> dict:
+    while True:
+        print("\nIdentified options:")
+        for i, opt in enumerate(options.keys(), start=1):
+            print(f"{i}. {opt}")
+
+        choice = input(
+            "\n[a] Add option  [r] Remove option  [c] Continue: "
+        ).strip().lower()
+
+        if choice == "c":
+            break
+
+        elif choice == "a":
+            name = input("Enter new option name: ").strip()
+            if name:
+                options[name] = {}
+
+        elif choice == "r":
+            idx = input("Enter option number to remove: ").strip()
+            if idx.isdigit():
+                i = int(idx) - 1
+                if 0 <= i < len(options):
+                    key = list(options.keys())[i]
+                    options.pop(key)
+
+    return options
+
+from utils.normalization import normalize_key
+
+
+def confirm_criteria(criteria: dict) -> dict:
+    """
+    Allows the user to add or remove criteria suggested by the Structure Agent.
+    """
+
+    while True:
+        print("\nIdentified criteria:")
+        keys = list(criteria.keys())
+
+        for i, k in enumerate(keys, start=1):
+            ctype = criteria[k].get("type", "unknown")
+            print(f"{i}. {k} ({ctype})")
+
+        choice = input(
+            "\n[a] Add criterion  [r] Remove criterion  [c] Continue: "
+        ).strip().lower()
+
+        if choice == "c":
+            break
+
+        elif choice == "a":
+            name = input("Enter criterion name: ").strip()
+            if not name:
+                continue
+
+            key = normalize_key(name)
+
+            ctype = input(
+                "Is this a benefit or cost? (b = benefit, c = cost): "
+            ).strip().lower()
+
+            criteria[key] = {
+                "type": "benefit" if ctype == "b" else "cost",
+                "description": "User-added criterion",
+                "scale": [],
+                "unit": None
+            }
+
+        elif choice == "r":
+            idx = input("Enter criterion number to remove: ").strip()
+            if idx.isdigit():
+                i = int(idx) - 1
+                if 0 <= i < len(keys):
+                    criteria.pop(keys[i])
 
     return criteria
-
-
 
 # def get_ratings(options, criteria):    #Depreciated in favor of more structured input methods
 #     ratings = {}
