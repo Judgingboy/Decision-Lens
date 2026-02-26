@@ -7,7 +7,7 @@ from utils.input_helpers import (
     confirm_ordinal_scales,
     get_multiline_input,
     confirm_options,
-    confirm_criteria
+    confirm_criteria,
 )
 
 
@@ -28,27 +28,42 @@ def main():
         return
 
     # 3. User confirms / edits OPTIONS
-    options = confirm_options(options)
+    options = confirm_options(options,criteria)
 
     # 4. User confirms / edits CRITERIA
-    criteria = confirm_criteria(criteria)
-
+    criteria = confirm_criteria(criteria, options)
+    
     # 5. User confirms cost vs benefit
     criteria = confirm_criteria_types(criteria)
 
     # 6. User confirms ordinal scales
-    criteria = confirm_ordinal_scales(criteria)
+    criteria = confirm_ordinal_scales(criteria, options)
 
-    # 7. User ranks criteria (importance)
+    # 7. Prompt for missing attributes
+    # options = prompt_missing_attributes(options, criteria)  #depreciated, now handled in confirm_options and confirm_criteria
+
+    # Warn if criteria have no data across all options
+    for c in criteria:
+        if all(
+            options.get(opt, {}).get(c) in (None, "unknown")
+            for opt in options
+        ):
+            print(
+                f"\nWarning: Some criteria have no data for any option. "
+                "Results may be inconclusive."
+            )
+            break
+
+    # 8. User ranks criteria (importance)
     criterion_names = list(criteria.keys())
     weights = get_weights_from_ranking(criterion_names)
 
-    # 8. Prepare criteria types for engine
+    # 9. Prepare criteria types for engine
     criteria_types = {
         c: meta["type"] for c, meta in criteria.items()
     }
 
-    # 9. Attribute mapping (descriptors → numbers)
+    # 10. Attribute mapping (descriptors → numbers)
     mapped_attributes = map_attributes({
         "criteria": criteria,
         "options": options
@@ -58,7 +73,7 @@ def main():
     print("\nCriteria:", criteria)
     print("\nMapped attributes:", mapped_attributes)
 
-    # 10. Deterministic scoring
+    # 11. Deterministic scoring
     results = compute_weighted_scores(
         options=list(mapped_attributes.keys()),
         criteria=criterion_names,
@@ -67,7 +82,7 @@ def main():
         criteria_types=criteria_types
     )
 
-    # 11. Output results
+    # 12. Output results
     print("\nRanked Results:")
     for option, score in results.items():
         print(f"{option}: {score}")

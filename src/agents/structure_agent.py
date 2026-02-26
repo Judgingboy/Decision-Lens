@@ -100,28 +100,43 @@ def structure_decision(user_input: str) -> dict:
     Converts natural language decision input into structured attributes.
     """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        temperature=0.2,
-        messages=[
-            {"role": "system", "content": STRUCTURE_SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": f"""
+    last_error = None
+
+    for attempt in range(2):  # one retry
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0.2,
+            response_format={"type": "json_object"},    #FORCE JSON OUTPUT
+            messages=[
+                {"role": "system", "content": STRUCTURE_SYSTEM_PROMPT},
+                {
+                    "role": "user",
+                    "content": f"""
 User decision description:
 \"\"\"{user_input}\"\"\"
 
 {STRUCTURE_SCHEMA_DESCRIPTION}
+
+IMPORTANT:
+- Output ONLY valid JSON
+- No comments
+- No trailing commas
+- No explanations
 """
-            }
-        ],
-    )
+                }
+            ],
+        )
 
-    content = response.choices[0].message.content.strip()
+        content = response.choices[0].message.content.strip()
 
-    try:
-        structured_data = json.loads(content)
-    except json.JSONDecodeError as e:
-        raise ValueError("Structure Agent returned invalid JSON") from e
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError as e:
+            last_error = e
+            # Retry with stronger instruction
+            user_input += (
+                "\n\nNOTE: Your previous response was invalid JSON. "
+                "Return ONLY valid JSON matching the schema."
+            )
 
-    return structured_data
+    raise ValueError("Structure Agent returned invalid JSON") from last_error
