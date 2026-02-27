@@ -31,3 +31,23 @@ Confirmed structure
 Attribute mapping
    ↓
 Decision engine
+
+
+
+STRUCTURE (AI + user confirmation)
+        ↓
+ATTRIBUTE MAPPING
+        ↓
+SCORING
+        ↓
+SHOW RESULTS
+        ↓
+┌──────────────────────────┐
+│   Modify & Re-evaluate?  │◄───┐
+└──────────────────────────┘    │
+        ↓ yes                   │
+EDIT STATE (options / criteria / values / weights)
+        ↓                       │
+RE-RUN SCORING ─────────────────┘
+        ↓ no
+EXIT

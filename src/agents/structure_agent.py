@@ -40,9 +40,24 @@ For EACH criterion you MUST:
   • You MUST specify a unit (e.g. "USD", "grams", "hours")
   • You MUST NOT provide a scale
 
+- If a criterion:
+  • Has no numeric values across all options
+  • AND has no ordinal scale 
+    →Force it into qualitative mode and ask the user to define a scale
+
 - Extract raw numeric values when the user provides numbers
 - Use descriptive terms ONLY if numeric values are not available
 - Use "unknown" when information is missing
+-If no numeric values are provided for a measurable attribute, prefer a qualitative ordinal scale.
+
+
+IMPORTANT NAMING RULE:
+- Criterion names must refer to the RAW MEASURABLE ATTRIBUTE
+- Do NOT use derived or interpretive names such as:
+  "affordability", "value", "quality", "overall goodness"
+- Use concrete attributes instead:
+  "price", "cost", "calories", "protein", "time", "distance"
+- The interpretation (e.g., affordability) will be handled later via cost/benefit and weighting
 
 IMPORTANT:
 - All cost/benefit classifications are PROVISIONAL

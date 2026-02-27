@@ -63,21 +63,36 @@ def get_criteria_from_user(prompt):
 
 def get_weights_from_ranking(criteria):
     rankings = {}
-    print("\nRank criteria by importance (1 = highest priority):")
+    used_ranks = set()
+
+    print("\nRank criteria by importance (1 = highest priority).")
+    print("Each rank must be UNIQUE (no ties).\n")
 
     for criterion in criteria:
         while True:
             try:
                 rank = int(input(f"{criterion}: "))
-                if 1 <= rank <= len(criteria):
-                    rankings[criterion] = rank
-                    break
-                else:
+
+                if not (1 <= rank <= len(criteria)):
                     print(f"Enter a number between 1 and {len(criteria)}.")
+                    continue
+
+                if rank in used_ranks:
+                    print(
+                        f"Rank {rank} already used. "
+                        "Each criterion must have a unique rank."
+                    )
+                    continue
+
+                rankings[criterion] = rank
+                used_ranks.add(rank)
+                break
+
             except ValueError:
                 print("Please enter a valid integer.")
 
     max_rank = len(criteria)
+
     raw_weights = {
         c: (max_rank + 1) - r
         for c, r in rankings.items()
@@ -131,9 +146,88 @@ def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
     Resolves scale mismatches using explicit user choices.
     """
 
+    # ---------------- NEW: helper for auto-generated scales ----------------
+    def auto_generate_scale(criterion_name: str):
+        name = criterion_name.lower()
+
+        if "clearance" in name:
+            return ["low", "adequate", "high"]
+        if "safety" in name:
+            return ["poor", "average", "good"]
+        if "comfort" in name:
+            return ["poor", "okay", "good", "excellent"]
+        if "feel" in name or "driving" in name:
+            return ["boring", "decent", "fun"]
+
+        # Generic fallback
+        return ["low", "medium", "high"]
+    # ----------------------------------------------------------------------
+
     for raw_key, meta in criteria.items():
         key = normalize_key(raw_key)
         scale = meta.get("scale")
+
+        # ---------------- FIX: detect numeric data using raw and normalized keys ----------------
+        has_numeric = False
+        for opt_vals in options.values():
+            raw_val = opt_vals.get(raw_key)
+            norm_val = opt_vals.get(key)
+
+            if isinstance(raw_val, (int, float)) or isinstance(norm_val, (int, float)):
+                has_numeric = True
+                break
+        # --------------------------------------------------------------------------------------
+
+        # ---------------- NEW: handle missing scale with choices -----------
+        if not scale and not has_numeric:
+            print(f"\nCriterion '{raw_key}' has no numeric values.")
+            print("How would you like to handle this?")
+            print("[1] Define an ordinal scale (recommended)")
+            print("[2] Auto-generate a simple scale for me")
+            print("[3] Ignore this criterion")
+
+            choice = input("Choice (default = 1): ").strip() or "1"
+
+            # Option 1: User defines scale
+            if choice == "1":
+                new_scale = input(
+                    f"Enter ordinal scale for '{raw_key}' "
+                    "(comma-separated, lowest → highest): "
+                ).strip()
+
+                if not new_scale:
+                    print(f"⚠ No scale provided. '{raw_key}' will be ignored.")
+                    meta["ignored"] = True
+                    continue
+
+                meta["scale"] = [s.strip() for s in new_scale.split(",")]
+                meta["unit"] = None
+                scale = meta["scale"]
+
+            # Option 2: Auto-generate scale
+            elif choice == "2":
+                auto_scale = auto_generate_scale(raw_key)
+                meta["scale"] = auto_scale
+                meta["unit"] = None
+                scale = meta["scale"]
+
+                print(
+                    f"✔ Auto-generated scale for '{raw_key}': "
+                    f"{' < '.join(auto_scale)}"
+                )
+                print("You can edit this scale in the next step if needed.")
+
+            # Option 3: Ignore explicitly
+            elif choice == "3":
+                print(f"✔ '{raw_key}' will be ignored.")
+                meta["ignored"] = True
+                continue
+
+            else:
+                print(f"Invalid choice. '{raw_key}' will be ignored.")
+                meta["ignored"] = True
+                continue
+        # ------------------------------------------------------------------
 
         # Skip numeric or non-ordinal criteria
         if not scale:
@@ -338,16 +432,37 @@ def resolve_scale_mismatch(
     unknown_values: set[str]
 ) -> tuple[list[str], dict[str, str], set[str]]:
     """
-    Returns:
-    - updated_scale
-    - alias_map (e.g. {"mostly_good": "okay"})
-    - ignored_values
-    """
+     Returns:
+     - updated_scale
+     - alias_map (e.g. {"mostly_good": "okay"})
+     - ignored_values
+     """
+
     alias_map = {}
     ignored = set()
+     # Helper: suggest mappings by relative position / similarity
+    def suggest_mappings(values, scale):
+        suggestions = {}
+        for v in values:
+            v_norm = v.replace("_", " ")
+            if "extreme" in v_norm or "excellent" in v_norm:
+                suggestions[v] = scale[-1]
+            elif "very" in v_norm or "good" in v_norm:
+                suggestions[v] = scale[-2] if len(scale) >= 2 else scale[-1]
+            elif "decent" in v_norm or "okay" in v_norm:
+                suggestions[v] = scale[len(scale)//2]
+            elif "not" in v_norm or "poor" in v_norm:
+                suggestions[v] = scale[0]
+        return suggestions
+
+    print(
+        f"\n⚠ The following values are not in the scale for '{criterion_name}': "
+        f"{', '.join(unknown_values)}"
+    )
+    print("You will resolve them one by one.\n")
 
     for val in unknown_values:
-        print(f'\nThe value "{val}" is not in the scale.')
+        print(f'\nResolving value: "{val}"')
 
         while True:
             choice = input(
@@ -359,11 +474,9 @@ def resolve_scale_mismatch(
                 "Choice: "
             ).strip().lower()
 
-            # ADD TO SCALE
+            # -------- ADD TO SCALE ----------
             if choice == "a":
-                print("\nCurrent scale (lowest → highest):")
-                for i, s in enumerate(scale, start=1):
-                    print(f"{i}. {s}")
+                print_scale(scale)
 
                 pos = input(
                     f"Insert '{val}' at position (1–{len(scale)+1}): "
@@ -373,9 +486,11 @@ def resolve_scale_mismatch(
                     idx = int(pos) - 1
                     if 0 <= idx <= len(scale):
                         scale.insert(idx, val)
+                        print(f'\n✔ Added "{val}" to scale.')
+                        print_scale(scale)   # ✅ VISUAL FEEDBACK
                         break
 
-            # MAP TO EXISTING
+            # ---------- MAP ----------
             elif choice == "m":
                 print("\nMap to:")
                 for i, s in enumerate(scale, start=1):
@@ -386,23 +501,107 @@ def resolve_scale_mismatch(
                     idx = int(sel) - 1
                     if 0 <= idx < len(scale):
                         alias_map[val] = scale[idx]
+                        print(f'\n✔ Mapped "{val}" → "{scale[idx]}"')
+                        print_scale(scale)   # ✅ SHOW CURRENT STATE
                         break
 
-            # IGNORE
+            # ---------- IGNORE ----------
             elif choice == "i":
-                ignored.add(val)
-                break
+                remaining = unknown_values - ignored - {val}
 
-            # EDIT ENTIRE SCALE
+                if not remaining:
+                    print(
+                        f"\n⚠ WARNING:\n"
+                        f"Ignoring this value will leave NO usable data for "
+                        f'"{criterion_name}".'
+                    )
+                else:
+                    print(
+                        f"\n⚠ Warning: Ignoring this value will remove "
+                        f"usable data for some options under "
+                        f'"{criterion_name}".'
+                    )
+
+                if input("Proceed anyway? (y/n): ").strip().lower() == "y":
+                    ignored.add(val)
+                    print(f'\n✔ Ignored "{val}".')
+                    print_scale(scale)   # ✅ CONFIRM NOTHING ELSE BROKE
+                    break
+
+            # ---------- EDIT ENTIRE SCALE ----------
             elif choice == "e":
                 new_scale = input(
                     "Enter new scale (comma-separated, lowest → highest): "
                 ).strip()
-                if new_scale:
-                    scale[:] = [s.strip() for s in new_scale.split(",")]
+                if not new_scale:
+                    continue
+
+                scale[:] = [s.strip() for s in new_scale.split(",")]
+                print(f"\n✔ Replaced entire scale for '{criterion_name}'.")
+                print_scale(scale)   # ✅ SHOW NEW BASELINE
+
+                followup = input(
+                    "\nHandle existing values:\n"
+                    "[a] Map manually\n"
+                    "[m] Auto-map similar values\n"
+                    "[i] Ignore all\n"
+                    "Choice: "
+                ).strip().lower()
+
+                if followup == "m":
+                    suggestions = suggest_mappings(unknown_values, scale)
+                    print("\nSuggested mappings:")
+                    for k, v in suggestions.items():
+                        print(f"{k} → {v}")
+
+                    if input("Apply these mappings? (y/n): ").strip().lower() == "y":
+                        alias_map.update(suggestions)
+                        print("\n✔ Auto-mappings applied.")
+                        print_scale(scale)
+                    break
+
+                elif followup == "a":
+                    for v in unknown_values:
+                        print(f"\nMap '{v}' to:")
+                        for i, s in enumerate(scale, start=1):
+                            print(f"{i}. {s}")
+                        sel = input("Choose number (or Enter to skip): ").strip()
+                        if sel.isdigit():
+                            idx = int(sel) - 1
+                            if 0 <= idx < len(scale):
+                                alias_map[v] = scale[idx]
+                                print(f'✔ Mapped "{v}" → "{scale[idx]}"')
+                    print_scale(scale)
+                    break
+
+                elif followup == "i":
+                    print(
+                        f"\n⚠ WARNING: All values ignored for '{criterion_name}'."
+                    )
+                    if input("Proceed anyway? (y/n): ").strip().lower() == "y":
+                        ignored.update(unknown_values)
+                        print_scale(scale)
                     break
 
     return scale, alias_map, ignored
+
+
+def print_scale(scale):
+    print("\nUpdated scale (lowest → highest):")
+    for i, s in enumerate(scale, start=1):
+        print(f"{i}. {s}")
+
+
+def post_result_menu():
+    print("\nWhat would you like to do next?")
+    print("[1] Change criteria importance")
+    print("[2] Add / remove / edit options")
+    print("[3] Add / remove / edit criteria")
+    print("[0] Exit")
+
+    return input("Choice: ").strip()
+
+
 
 # def prompt_missing_attributes(options: dict, criteria: dict) -> dict:
 #     print("\nEnter attributes for options (press Enter to skip):")

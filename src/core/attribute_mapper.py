@@ -1,7 +1,4 @@
 from utils.normalization import normalize_key
-def normalize_text(value: str) -> str:
-    return value.strip().lower()
-
 
 def map_attributes(structured_data: dict) -> dict:
     """
@@ -23,7 +20,6 @@ def map_attributes(structured_data: dict) -> dict:
 
         for raw_criterion, raw_value in attrs.items():
             c_key = normalize_key(raw_criterion)
-
             # Unknown stays unknown
             if raw_value == "unknown":
                 mapped[option][c_key] = None
@@ -33,25 +29,32 @@ def map_attributes(structured_data: dict) -> dict:
             if not meta:
                 mapped[option][c_key] = None
                 continue
-
             # Numeric values pass through
             if isinstance(raw_value, (int, float)):
                 mapped[option][c_key] = raw_value
                 continue
-
             # Ordinal mapping
             scale = meta.get("scale")
             if not scale:
                 mapped[option][c_key] = None
                 continue
+            # 🔹 APPLY ALIAS IF PRESENT
+            aliases = meta.get("aliases", {})
+            value_norm = normalize_key(str(raw_value))
+
+            if value_norm in aliases:
+                value_norm = normalize_key(aliases[value_norm])
 
             scale_norm = [normalize_key(s) for s in scale]
-            value_norm = normalize_key(str(raw_value))
 
             if value_norm not in scale_norm:
                 mapped[option][c_key] = None
                 continue
 
             mapped[option][c_key] = scale_norm.index(value_norm) + 1
+
+        # 🔹 OPTIONAL: ensure all criteria exist per option
+        for c in normalized_criteria:
+            mapped[option].setdefault(c, None)
 
     return mapped
