@@ -142,14 +142,16 @@ def confirm_criteria_types(criteria):
 
 def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
     """
-    Allows the user to confirm or edit ordinal scales suggested by the Structure Agent.
-    Resolves scale mismatches using explicit user choices.
+    Allows the user to confirm or edit ordinal scales.
+    Distinguishes between USER-defined and AUTO-generated scales.
     """
 
-    # ---------------- NEW: helper for auto-generated scales ----------------
+    # ---------------- helper: auto-generate simple scales ----------------
     def auto_generate_scale(criterion_name: str):
         name = criterion_name.lower()
 
+        if "salary" in name or "price" in name:
+            return ["low", "medium", "high"]
         if "clearance" in name:
             return ["low", "adequate", "high"]
         if "safety" in name:
@@ -159,26 +161,28 @@ def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
         if "feel" in name or "driving" in name:
             return ["boring", "decent", "fun"]
 
-        # Generic fallback
         return ["low", "medium", "high"]
-    # ----------------------------------------------------------------------
+    # --------------------------------------------------------------------
 
     for raw_key, meta in criteria.items():
+
+        # 🔕 Skip explicitly ignored criteria
+        if meta.get("ignored"):
+            continue
+
         key = normalize_key(raw_key)
         scale = meta.get("scale")
 
-        # ---------------- FIX: detect numeric data using raw and normalized keys ----------------
+        # ---------- detect numeric data ----------
         has_numeric = False
         for opt_vals in options.values():
-            raw_val = opt_vals.get(raw_key)
-            norm_val = opt_vals.get(key)
-
-            if isinstance(raw_val, (int, float)) or isinstance(norm_val, (int, float)):
+            val = opt_vals.get(raw_key) or opt_vals.get(key)
+            if isinstance(val, (int, float)):
                 has_numeric = True
                 break
-        # --------------------------------------------------------------------------------------
+        # ----------------------------------------
 
-        # ---------------- NEW: handle missing scale with choices -----------
+        # ---------- scale missing & no numeric ----------
         if not scale and not has_numeric:
             print(f"\nCriterion '{raw_key}' has no numeric values.")
             print("How would you like to handle this?")
@@ -188,94 +192,86 @@ def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
 
             choice = input("Choice (default = 1): ").strip() or "1"
 
-            # Option 1: User defines scale
             if choice == "1":
-                new_scale = input(
+                user_scale = input(
                     f"Enter ordinal scale for '{raw_key}' "
                     "(comma-separated, lowest → highest): "
                 ).strip()
 
-                if not new_scale:
-                    print(f"⚠ No scale provided. '{raw_key}' will be ignored.")
+                if not user_scale:
+                    print(f"✔ '{raw_key}' ignored.")
                     meta["ignored"] = True
                     continue
 
-                meta["scale"] = [s.strip() for s in new_scale.split(",")]
-                meta["unit"] = None
+                meta["scale"] = [s.strip() for s in user_scale.split(",")]
+                meta["scale_source"] = "user"
                 scale = meta["scale"]
 
-            # Option 2: Auto-generate scale
             elif choice == "2":
                 auto_scale = auto_generate_scale(raw_key)
                 meta["scale"] = auto_scale
-                meta["unit"] = None
-                scale = meta["scale"]
+                meta["scale_source"] = "auto"
+                scale = auto_scale
 
                 print(
                     f"✔ Auto-generated scale for '{raw_key}': "
                     f"{' < '.join(auto_scale)}"
                 )
-                print("You can edit this scale in the next step if needed.")
-
-            # Option 3: Ignore explicitly
-            elif choice == "3":
-                print(f"✔ '{raw_key}' will be ignored.")
-                meta["ignored"] = True
-                continue
 
             else:
-                print(f"Invalid choice. '{raw_key}' will be ignored.")
+                print(f"✔ '{raw_key}' ignored.")
                 meta["ignored"] = True
                 continue
-        # ------------------------------------------------------------------
+        # --------------------------------------------
 
-        # Skip numeric or non-ordinal criteria
+        # Numeric-only criteria → skip
         if not scale:
             continue
 
-        # ---- Step 1: Confirm proposed scale ----
+        # ---------- confirm scale ----------
         print("\nCriterion:", raw_key)
         print("Proposed order (worst → best):")
         for i, v in enumerate(scale, start=1):
             print(f"{i}. {v}")
 
-        print("\nThis order defines what is considered better for comparison.")
-        choice = input("Is this order correct for you? (y/n): ").strip().lower()
+        confirm = input("Is this order correct for you? (y/n): ").strip().lower()
 
-        if choice != "y":
-            new_scale = input(
+        if confirm != "y":
+            edited = input(
                 "Enter corrected scale (comma-separated, lowest → highest): "
             ).strip()
-            if new_scale:
-                scale = [s.strip() for s in new_scale.split(",")]
-                meta["scale"] = scale
 
-        # ---- Step 2: Detect descriptor mismatches ----
+            if edited:
+                meta["scale"] = [s.strip() for s in edited.split(",")]
+                meta["scale_source"] = "user"
+                scale = meta["scale"]
+        # -----------------------------------
+
+        # ---------- detect descriptor mismatches ----------
         detected = set()
         for opt_vals in options.values():
             val = opt_vals.get(key)
-            if isinstance(val, str):
+            if isinstance(val, str) and normalize_key(val) != "unknown":
                 detected.add(normalize_key(val))
 
-        scale_norm = {normalize_key(s) for s in meta["scale"]}
+        scale_norm = {normalize_key(s) for s in scale}
         missing = detected - scale_norm
+        # --------------------------------------------------
 
-        # ---- Step 3: Resolve mismatches explicitly ----
         if missing:
-            updated_scale, alias_map, ignored = resolve_scale_mismatch(
+            updated_scale, alias_map, ignored_vals = resolve_scale_mismatch(
                 criterion_name=raw_key,
-                scale=meta["scale"],
+                scale=scale,
                 unknown_values=missing
             )
 
             meta["scale"] = updated_scale
 
-            # Store alias & ignored values for mapper
             if alias_map:
                 meta.setdefault("aliases", {}).update(alias_map)
 
-            if ignored:
-                meta.setdefault("ignored_values", set()).update(ignored)
+            if ignored_vals:
+                meta.setdefault("ignored_values", set()).update(ignored_vals)
 
     return criteria
 
@@ -601,7 +597,88 @@ def post_result_menu():
 
     return input("Choice: ").strip()
 
+from utils.normalization import normalize_key
 
+def resolve_empty_scaled_criteria(criteria: dict, options: dict) -> dict:
+    """
+    Handles USER-defined ordinal criteria that have a scale
+    but no option values.
+
+    AUTO-generated scales are NEVER prompted here.
+    """
+
+    for raw_criterion, meta in list(criteria.items()):
+
+        # 🔕 Skip ignored criteria
+        if meta.get("ignored"):
+            continue
+
+        # 🔕 Skip criteria without a scale
+        if not meta.get("scale"):
+            continue
+
+        # 🔥 CRITICAL FIX:
+        # Only USER-defined scales are allowed to prompt here
+        if meta.get("scale_source") != "user":
+            continue
+
+        key = normalize_key(raw_criterion)
+
+        # Check if ALL options are missing this criterion
+        all_missing = all(
+            options.get(opt, {}).get(key) in (None, "unknown")
+            for opt in options
+        )
+
+        if not all_missing:
+            continue
+
+        print(
+            f"\n⚠ You defined a scale for '{raw_criterion}', "
+            f"but no options have values for it."
+        )
+        print("Would you like to:")
+        print("[1] Enter values now")
+        print("[2] Ignore this criterion")
+
+        choice = input("Choice (default = 2): ").strip() or "2"
+
+        if choice == "1":
+            from utils.input_helpers import prompt_missing_values_for_criterion
+            prompt_missing_values_for_criterion(
+                criterion=raw_criterion,
+                criteria=criteria,
+                options=options
+            )
+        else:
+            meta["ignored"] = True
+            print(f"✔ '{raw_criterion}' has been ignored.")
+
+    return criteria
+
+def prompt_missing_values_for_criterion(
+    criterion: str,
+    criteria: dict,
+    options: dict
+):
+    meta = criteria[criterion]
+    scale = meta.get("scale")
+    unit = meta.get("unit")
+
+    print(f"\nEnter values for '{criterion}':")
+
+    for opt in options:
+        if options[opt].get(criterion) not in (None, "unknown"):
+            continue
+
+        if scale:
+            print(f"  {opt} (choose from: {', '.join(scale)}): ", end="")
+            val = input().strip()
+            options[opt][criterion] = val if val else "unknown"
+        else:
+            print(f"  {opt} (enter number{f' ({unit})' if unit else ''}): ", end="")
+            val = input().strip()
+            options[opt][criterion] = float(val) if val else None
 
 # def prompt_missing_attributes(options: dict, criteria: dict) -> dict:
 #     print("\nEnter attributes for options (press Enter to skip):")

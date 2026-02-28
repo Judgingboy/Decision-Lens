@@ -1,3 +1,7 @@
+# This is a simple test script to verify that the OpenAI API key is working correctly.
+# use this to debug any issues with the API key before running the full application.
+#This is no way part of the actual application logic.
+
 from dotenv import load_dotenv
 import os
 from openai import OpenAI

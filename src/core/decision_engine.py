@@ -76,5 +76,5 @@ def compute_weighted_scores(options, criteria, weights, values, criteria_types):
 
         results[opt] = round(score, 3)
 
-    return dict(sorted(results.items(), key=lambda x: x[1], reverse=True))
-
+    sorted_results = dict(sorted(results.items(), key=lambda x: x[1], reverse=True))
+    return sorted_results, normalized

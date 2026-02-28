@@ -1,3 +1,5 @@
+## This is about buying a car
+
 I need help deciding what vehicle to buy, and honestly my thoughts are all over the place.
 
 I live in a city with terrible roads and traffic, but I also do highway trips maybe once or twice a month.
@@ -46,3 +48,59 @@ Some things I’m not sure about:
 - How much ground clearance actually matters day to day
 
 Help me think this through.
+
+
+----------------Prompt 2-----------------------
+
+#This is about selecting a remote job offer 
+
+I’m trying to decide which remote job offer I should accept, and my thoughts are honestly very messy.
+
+I care about money, but it’s not the only thing.
+Work-life balance matters a lot, and so does how interesting the work feels.
+I also care about company culture, but I don’t really know how to measure that.
+Career growth is important, but I don’t have exact numbers for that either.
+
+Here are the offers I’m considering:
+
+1) Startup A (early-stage fintech)
+The salary is decent, but not crazy.
+Work-life balance seems bad — long hours and lots of pressure.
+The work sounds very exciting and challenging.
+Company culture feels intense and chaotic.
+Career growth could be fast, but risky.
+
+2) Company B (mid-size product company)
+Salary is good and stable.
+Work-life balance seems pretty good.
+The work sounds okay, not super exciting.
+Culture feels professional and supportive.
+Career growth feels steady but slow.
+
+3) Big Tech C
+Salary is very high.
+Work-life balance is mixed — depends on the team.
+The work might be boring at times.
+Culture feels very corporate.
+Career growth is structured but competitive.
+
+4) Remote Agency D
+Salary is low.
+Work-life balance seems excellent.
+Work feels repetitive and not very exciting.
+Culture feels relaxed.
+Career growth is unclear.
+
+What I roughly care about:
+- I don’t want burnout
+- I don’t want boring work
+- Money matters, but not above everything
+- I care about long-term growth, even if it’s not immediate
+- Culture matters, but I can’t define it clearly
+
+Some things I’m unsure about:
+- How to measure culture
+- How to compare “interesting work”
+- How to compare growth potential
+
+Help me make sense of this.
