@@ -672,13 +672,49 @@ def prompt_missing_values_for_criterion(
             continue
 
         if scale:
-            print(f"  {opt} (choose from: {', '.join(scale)}): ", end="")
-            val = input().strip()
-            options[opt][criterion] = val if val else "unknown"
+            # Ordinal value: force explicit choice
+            while True:
+                val = input(
+                    f"  {opt} (choose from: {', '.join(scale)} or type 'skip'): "
+                ).strip()
+
+                if not val:
+                    print("Please enter a value or type 'skip'.")
+                    continue
+
+                if val.lower() == "skip":
+                    options[opt][criterion] = "unknown"
+                    break
+
+                if normalize_key(val) not in [
+                    normalize_key(s) for s in scale
+                ]:
+                    print("Invalid value. Please choose from the scale.")
+                    continue
+
+                options[opt][criterion] = val
+                break
+
         else:
-            print(f"  {opt} (enter number{f' ({unit})' if unit else ''}): ", end="")
-            val = input().strip()
-            options[opt][criterion] = float(val) if val else None
+            # Numeric value: same idea, explicit skip
+            while True:
+                val = input(
+                    f"  {opt} (enter number{f' ({unit})' if unit else ''} or type 'skip'): "
+                ).strip()
+
+                if not val:
+                    print("Please enter a number or type 'skip'.")
+                    continue
+
+                if val.lower() == "skip":
+                    options[opt][criterion] = None
+                    break
+
+                try:
+                    options[opt][criterion] = float(val)
+                    break
+                except ValueError:
+                    print("Invalid number. Please try again.")
 
 # def prompt_missing_attributes(options: dict, criteria: dict) -> dict:
 #     print("\nEnter attributes for options (press Enter to skip):")
