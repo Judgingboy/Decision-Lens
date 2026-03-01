@@ -1,3 +1,5 @@
+from utils.normalization import normalize_key
+
 def compute_weighted_scores(options, criteria, weights, values, criteria_types):
     """
     Computes weighted scores with:
@@ -10,10 +12,11 @@ def compute_weighted_scores(options, criteria, weights, values, criteria_types):
     criterion_values = {}
 
     for criterion in criteria:
+        c_key = normalize_key(criterion)
         vals = [
-            values[opt][criterion]
+            values[opt][c_key]
             for opt in options
-            if values[opt].get(criterion) is not None
+            if values[opt].get(c_key) is not None
         ]
         criterion_values[criterion] = vals
 
@@ -21,6 +24,7 @@ def compute_weighted_scores(options, criteria, weights, values, criteria_types):
     normalized = {opt: {} for opt in options}
 
     for criterion in criteria:
+        c_key = normalize_key(criterion)
         vals = criterion_values[criterion]
 
         # If nobody has data for this criterion, skip entirely
@@ -31,7 +35,7 @@ def compute_weighted_scores(options, criteria, weights, values, criteria_types):
         max_v = max(vals)
 
         for opt in options:
-            raw = values[opt].get(criterion)
+            raw = values[opt].get(c_key)
 
             if raw is None:
                 normalized[opt][criterion] = None

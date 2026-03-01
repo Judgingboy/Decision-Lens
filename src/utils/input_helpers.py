@@ -218,6 +218,9 @@ def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
                     f"{' < '.join(auto_scale)}"
                 )
 
+                # 🔥 NEW: if this was numeric before, allow value entry ONCE
+                if meta.get("unit") and not has_numeric:
+                    meta["_needs_value_entry"] = True
             else:
                 print(f"✔ '{raw_key}' ignored.")
                 meta["ignored"] = True
@@ -273,6 +276,17 @@ def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
             if ignored_vals:
                 meta.setdefault("ignored_values", set()).update(ignored_vals)
 
+        # 🔥 Numeric → auto ordinal: allow ONE value-entry pass
+        if meta.get("_needs_value_entry"):
+            from utils.input_helpers import prompt_missing_values_for_criterion
+
+            prompt_missing_values_for_criterion(
+                criterion=raw_key,
+                criteria=criteria,
+                options=options
+            )
+
+            meta.pop("_needs_value_entry", None)
     return criteria
 
 def confirm_options(options: dict, criteria: dict) -> dict:
@@ -350,12 +364,12 @@ def confirm_options(options: dict, criteria: dict) -> dict:
 
     return options
 
-
 def confirm_criteria(criteria: dict, options: dict) -> dict:
     """
     Allows the user to add or remove criteria.
-    If a new criterion is added, immediately asks for values
-    for all existing options.
+    If a new criterion is added:
+    - numeric values are requested ONLY if a unit is provided
+    - otherwise, value entry is deferred to ordinal scale handling
     """
 
     while True:
@@ -395,23 +409,28 @@ def confirm_criteria(criteria: dict, options: dict) -> dict:
                 "unit": unit if unit else None
             }
 
-            # NEW PART: ask values for all existing options
-            print(f"\nEnter values for new criterion '{name}' (press Enter to skip):")
+            # Ask for numeric values ONLY if a unit exists
+            if unit:
+                print(f"\nEnter values for new criterion '{name}' (press Enter to skip):")
 
-            for opt, attrs in options.items():
-                unit_label = f", unit: {unit}" if unit else ""
-                prompt = f"  {opt} (enter number only{unit_label}): "
+                for opt, attrs in options.items():
+                    prompt = f"  {opt} (enter number only, unit: {unit}): "
 
-                while True:
-                    val = input(prompt).strip()
-                    if not val:
-                        break
-
-                    try:
-                        attrs[key] = float(val)
-                        break
-                    except ValueError:
-                        print("  Invalid value. Please enter a number only.")
+                    while True:
+                        val = input(prompt).strip()
+                        if not val:
+                            break
+                        try:
+                            attrs[key] = float(val)
+                            break
+                        except ValueError:
+                            print("  Invalid number. Please enter a numeric value.")
+            else:
+                # No unit → defer value entry
+                print(
+                    f"\nℹ Skipping value entry for '{name}' — "
+                    "you’ll define a scale next if needed."
+                )
 
         elif choice == "r":
             idx = input("Enter criterion number to remove: ").strip()
@@ -669,7 +688,11 @@ def prompt_missing_values_for_criterion(
 
     for opt in options:
         if options[opt].get(criterion) not in (None, "unknown"):
-            continue
+            overwrite = input(
+                f"  {opt} already has a value. Overwrite? (y/n): "
+            ).strip().lower()
+            if overwrite != "y":
+                continue
 
         if scale:
             # Ordinal value: force explicit choice

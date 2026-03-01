@@ -202,7 +202,7 @@ def main():
         for option, score in results.items():
             print(f"{option}: {score}")
 
-        # 11. AI-generated explanation (DRAFT)
+        #11. AI-generated explanation (DRAFT)
         explanation_text = render_explanation(explanation_payload)
         print("\n--- Explanation ---")
         print(explanation_text)
@@ -232,6 +232,9 @@ def main():
             criteria = confirm_criteria(criteria, options)
             criteria = confirm_criteria_types(criteria)
             criteria = confirm_ordinal_scales(criteria, options)
+
+            # 🔥 REQUIRED: handle newly created USER scales with no values
+            criteria = resolve_empty_scaled_criteria(criteria, options)
 
             criterion_names = list(criteria.keys())
             criteria_types = {
