@@ -1,5 +1,6 @@
 from utils.normalization import normalize_key
 
+# Captures multiple lines of input until 'done' is typed.
 def get_multiline_input(prompt: str, end_token: str = "done") -> str:
     print(prompt)
     print(f"Type '{end_token}' on a new line when finished.\n")
@@ -14,20 +15,7 @@ def get_multiline_input(prompt: str, end_token: str = "done") -> str:
 
     return "\n".join(lines)
 
-# def get_list_from_user(prompt):  #Depreciated in favor of more structured input methods
-#     items = []
-#     print(prompt)
-#     print("Type 'done' when finished.\n")
-
-#     while True:
-#         value = input("> ").strip()
-#         if value.lower() == "done":
-#             break
-#         if value:
-#             items.append(value)
-
-#     return items
-
+# Gathers criteria and their benefit/cost classification.
 def get_criteria_from_user(prompt):
     criteria = []
     criteria_types = {}
@@ -61,6 +49,7 @@ def get_criteria_from_user(prompt):
     return criteria, criteria_types
 
 
+# Calculates importance weights from a user-provided ranking.
 def get_weights_from_ranking(criteria):
     rankings = {}
     used_ranks = set()
@@ -166,7 +155,7 @@ def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
 
     for raw_key, meta in criteria.items():
 
-        # 🔕 Skip explicitly ignored criteria
+        # Skip explicitly ignored criteria
         if meta.get("ignored"):
             continue
 
@@ -218,7 +207,7 @@ def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
                     f"{' < '.join(auto_scale)}"
                 )
 
-                # 🔥 NEW: if this was numeric before, allow value entry ONCE
+                #if this was numeric before, allow value entry ONCE
                 if meta.get("unit") and not has_numeric:
                     meta["_needs_value_entry"] = True
             else:
@@ -276,7 +265,7 @@ def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
             if ignored_vals:
                 meta.setdefault("ignored_values", set()).update(ignored_vals)
 
-        # 🔥 Numeric → auto ordinal: allow ONE value-entry pass
+        # Numeric → auto ordinal: allow ONE value-entry pass
         if meta.get("_needs_value_entry"):
             from utils.input_helpers import prompt_missing_values_for_criterion
 
@@ -289,6 +278,7 @@ def confirm_ordinal_scales(criteria: dict, options: dict) -> dict:
             meta.pop("_needs_value_entry", None)
     return criteria
 
+# Manages addition and removal of decision options.
 def confirm_options(options: dict, criteria: dict) -> dict:
     while True:
         print("\nIdentified options:")
@@ -540,7 +530,7 @@ def resolve_scale_mismatch(
                 if input("Proceed anyway? (y/n): ").strip().lower() == "y":
                     ignored.add(val)
                     print(f'\n✔ Ignored "{val}".')
-                    print_scale(scale)   # ✅ CONFIRM NOTHING ELSE BROKE
+                    print_scale(scale)  
                     break
 
             # ---------- EDIT ENTIRE SCALE ----------
@@ -553,7 +543,7 @@ def resolve_scale_mismatch(
 
                 scale[:] = [s.strip() for s in new_scale.split(",")]
                 print(f"\n✔ Replaced entire scale for '{criterion_name}'.")
-                print_scale(scale)   # ✅ SHOW NEW BASELINE
+                print_scale(scale)   # SHOW NEW BASELINE
 
                 followup = input(
                     "\nHandle existing values:\n"
@@ -601,12 +591,14 @@ def resolve_scale_mismatch(
     return scale, alias_map, ignored
 
 
+# Prints the current state of an ordinal scale.
 def print_scale(scale):
     print("\nUpdated scale (lowest → highest):")
     for i, s in enumerate(scale, start=1):
         print(f"{i}. {s}")
 
 
+# Navigation menu shown after viewing results.
 def post_result_menu():
     print("\nWhat would you like to do next?")
     print("[1] Change criteria importance")
@@ -628,15 +620,15 @@ def resolve_empty_scaled_criteria(criteria: dict, options: dict) -> dict:
 
     for raw_criterion, meta in list(criteria.items()):
 
-        # 🔕 Skip ignored criteria
+        # Skip ignored criteria
         if meta.get("ignored"):
             continue
 
-        # 🔕 Skip criteria without a scale
+        # Skip criteria without a scale
         if not meta.get("scale"):
             continue
 
-        # 🔥 CRITICAL FIX:
+        # CRITICAL FIX:
         # Only USER-defined scales are allowed to prompt here
         if meta.get("scale_source") != "user":
             continue
@@ -675,6 +667,7 @@ def resolve_empty_scaled_criteria(criteria: dict, options: dict) -> dict:
 
     return criteria
 
+# Prompts user to enter missing values for a specific criterion.
 def prompt_missing_values_for_criterion(
     criterion: str,
     criteria: dict,
@@ -739,52 +732,3 @@ def prompt_missing_values_for_criterion(
                 except ValueError:
                     print("Invalid number. Please try again.")
 
-# def prompt_missing_attributes(options: dict, criteria: dict) -> dict:
-#     print("\nEnter attributes for options (press Enter to skip):")
-
-#     for option, attrs in options.items():
-#         print(f"\nOption: {option}")
-
-#         for raw_c, meta in criteria.items():
-#             c = normalize_key(raw_c)
-
-#             # Skip if already present
-#             if c in attrs:
-#                 continue
-
-#             unit = meta.get("unit")
-#             label = f"{raw_c} ({unit})" if unit else raw_c
-
-#             val = input(f"  {label}: ").strip()
-#             if val:
-#                 # Try numeric first, else keep string
-#                 try:
-#                     val = float(val)
-#                 except ValueError:
-#                     pass
-
-#                 attrs[c] = val
-
-#     return options
-
-# def get_ratings(options, criteria):    #Depreciated in favor of more structured input methods
-#     ratings = {}
-#     print("\nRate each option for each criterion (1–10):")
-
-#     for option in options:
-#         print(f"\nOption: {option}")
-#         ratings[option] = {}
-
-#         for criterion in criteria:
-#             while True:
-#                 try:
-#                     score = float(input(f"  {criterion}: "))
-#                     if 1 <= score <= 10:
-#                         ratings[option][criterion] = score
-#                         break
-#                     else:
-#                         print("Score must be between 1 and 10.")
-#                 except ValueError:
-#                     print("Please enter a number.")
-
-#     return ratings

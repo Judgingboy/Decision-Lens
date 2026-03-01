@@ -189,7 +189,7 @@ def main():
             weights=weights
         )
         
-        # 🔍 Debug output (always current)
+        # 🔍 Debug output 
         if DEBUG:
             debug_state(criteria, weights, mapped_attributes)
             print("\n--- Explanation Payload ---")
@@ -233,7 +233,7 @@ def main():
             criteria = confirm_criteria_types(criteria)
             criteria = confirm_ordinal_scales(criteria, options)
 
-            # 🔥 REQUIRED: handle newly created USER scales with no values
+            # handle newly created USER scales with no values
             criteria = resolve_empty_scaled_criteria(criteria, options)
 
             criterion_names = list(criteria.keys())

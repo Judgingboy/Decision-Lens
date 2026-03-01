@@ -1,0 +1,139 @@
+<mxfile host="app.diagrams.net" modified="2024-05-20T12:00:00.000Z" agent="5.0" version="22.0.0" type="device">
+  <diagram id="Page-1" name="Decision-Lens Data Flow">
+    <mxGraphModel
+  dx="1000"
+  dy="800"
+  grid="1"
+  gridSize="10"
+  guides="1"
+  tooltips="1"
+  connect="1"
+  arrows="1"
+  fold="1"
+  page="0"
+  pageScale="1"
+  pageWidth="4000"
+  pageHeight="3000"
+  math="0"
+  shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- User Actor -->
+        <mxCell id="user" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="385" y="40" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Step 1: Input -->
+        <mxCell id="input" value="1. Initial Input Gathering&#xa;(get_multiline_input)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="310" y="160" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Step 2: Structure Agent -->
+        <mxCell id="struct" value="2. AI Structuring&#xa;(structure_decision)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="310" y="270" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Step 3: Refinement -->
+        <mxCell id="refine" value="3. Human-in-the-Loop Refinement&#xa;(confirm_options/criteria/scales)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="310" y="380" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Step 4: Attribute Mapping -->
+        <mxCell id="mapping" value="4. Attribute Mapping&#xa;(map_attributes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="310" y="490" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Step 5: Decision Engine -->
+        <mxCell id="engine" value="5. Decision Engine (Scoring)&#xa;(compute_weighted_scores)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="310" y="600" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Step 6: Explanation Builder -->
+        <mxCell id="builder" value="6. Explanation Payload Builder&#xa;(build_explanation_payload)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="310" y="710" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Step 7: Explanation Agent -->
+        <mxCell id="agent" value="7. AI Explanation Agent&#xa;(render_explanation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="310" y="820" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Step 8: Post-Result Menu -->
+        <mxCell id="menu" value="8. Interactive Menu&#xa;(post_result_menu)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="310" y="930" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Connections -->
+        <mxCell id="e1" value="Problem Description" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="user" target="input">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="e2" value="Raw Text" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="input" target="struct">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="e3" value="Draft JSON" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="struct" target="refine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="e4" value="Confirmed Schema" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="refine" target="mapping">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="e5" value="Numeric Attributes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="mapping" target="engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="e6" value="Rankings &amp; Values" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="engine" target="builder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="e7" value="Explanation Payload" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="builder" target="agent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="e8" value="Results &amp; Summary" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="agent" target="menu">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Feedback Loops -->
+        <mxCell id="e9" value="Change Weight/Importance" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="menu" target="engine">
+          <mxGeometry x="-0.85" y="-10" relative="1" as="geometry">
+            <mxPoint x="100" y="980" as="sourcePoint" />
+            <mxPoint x="100" y="630" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="150" y="980" />
+              <mxPoint x="150" y="630" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="e10" value="Modify Options/Criteria" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="menu" target="refine">
+          <mxGeometry x="-0.9" y="10" relative="1" as="geometry">
+            <mxPoint x="700" y="980" as="sourcePoint" />
+            <mxPoint x="700" y="410" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="650" y="980" />
+              <mxPoint x="650" y="410" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="e11" value="Exit System" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="menu" target="user">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="1080" />
+              <mxPoint x="800" y="1080" />
+              <mxPoint x="800" y="70" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

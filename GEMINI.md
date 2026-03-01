@@ -16,16 +16,21 @@
 
 ## Architecture & Data Structures
 - `src/main.py`: Entry point. Orchestrates dynamic user input and core engine.
-- `src/core/decision_engine.py`: Implements `compute_weighted_scores`, which now handles both "benefit" (higher is better) and "cost" (lower is better) criteria.
-- `src/core/validation.py`: Handles input validation for weights and ratings.
-- `src/utils/input_helpers.py`: Provides helper functions for interactive CLI input gathering, including capturing criteria types (cost/benefit) and ranking-based weights.
+- `src/core/decision_engine.py`: Implements `compute_weighted_scores`. Now includes **space-insensitive lookup** (using `normalize_key`) to ensure criteria with spaces match correctly with mapped attributes.
+- `src/core/explanation_builder.py`: Constructs a factual audit payload. Logic updated to categorize factors as positive/negative based on **actual score contribution** (0-1 norm) rather than just criterion type.
+- `src/core/attribute_mapper.py`: Converts raw descriptors into standardized numeric values based on user-defined ordinal scales.
+- `src/utils/input_helpers.py`: Provides interactive CLI helpers for gathering options, criteria, scales, and importance rankings.
 
 ### Data Schema
 - `options`: `list[str]`
-- `criteria`: `list[str]`
-- `criteria_types`: `dict[str, str]` (Maps criterion to its type: 'cost' or 'benefit')
+- `criteria`: `list[str]` (Original names with spaces)
+- `criteria_types`: `dict[str, str]` (Maps criterion to 'cost' or 'benefit')
 - `weights`: `dict[str, float]` (Maps criterion to importance weight)
-- `ratings`: `dict[str, dict[str, float]]` (Maps option to a dictionary of criterion scores)
+- `mapped_attributes`: `dict[str, dict[str, float]]` (Stored with normalized underscore keys)
+
+## Documentation & Diagrams
+- `Dataflow.md`: Mermaid-based data flow overview.
+- `Data_flow_level3.drawio`: Detailed Level 3 DFD showing **AI vs. Deterministic zones** and interactive loops.
 
 ## Building and Running
 
@@ -46,8 +51,8 @@ python src/main.py
 
 ## Roadmap
 - [x] Transition to dynamic CLI inputs.
-- [ ] Integrate AI-assisted input structuring (helping users translate qualitative descriptions into quantitative ratings).
+- [x] Integrate AI-assisted input structuring (GPT-4o-mini).
+- [x] Add visualization for score breakdowns and trade-off analysis (via DFDs and explanation payload).
 - [ ] Add a persistence layer to save and compare different decision sessions.
-- [ ] Add visualization for score breakdowns and trade-off analysis.
 - [ ] Implement a comprehensive `pytest` test suite.
 - [ ] Explore a web-based interface for improved accessibility.

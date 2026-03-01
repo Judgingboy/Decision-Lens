@@ -53,7 +53,7 @@ def map_attributes(structured_data: dict) -> dict:
 
             mapped[option][c_key] = scale_norm.index(value_norm) + 1
 
-        # 🔹 OPTIONAL: ensure all criteria exist per option
+        # 🔹 ensure all criteria exist per option
         for c in normalized_criteria:
             mapped[option].setdefault(c, None)
 

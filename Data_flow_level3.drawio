@@ -1,0 +1,133 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.6.0">
+  <diagram name="Page-1" id="t1IK6INbXjbG-XuDQMuo">
+    <mxGraphModel dx="1737" dy="957" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="User" vertex="1">
+          <mxGeometry height="60" width="30" x="410" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;" value="1.1 Capture Problem&#xa;(get_multiline_input)" vertex="1">
+          <mxGeometry height="40" width="160" x="350" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-6" edge="1" parent="1" style="edgeStyle=none;dashed=1;dashPattern=8 8;html=1;strokeWidth=2;strokeColor=#FF0000;endArrow=none;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="50" y="180" as="sourcePoint" />
+            <mxPoint x="810" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-7" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#FF0000;fontStyle=1" value="AI USED ZONE (Generative LLM)" vertex="1">
+          <mxGeometry height="30" width="200" x="600" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="2.1 Extract Schema&#xa;(structure_decision)" vertex="1">
+          <mxGeometry height="60" width="160" x="345" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-9" edge="1" parent="1" style="edgeStyle=none;dashed=1;dashPattern=8 8;html=1;strokeWidth=2;strokeColor=#4D9900;endArrow=none;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="45" y="320" as="sourcePoint" />
+            <mxPoint x="805" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-10" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#4D9900;fontStyle=1" value="DETERMINISTIC ZONE (Standard Python Logic)" vertex="1">
+          <mxGeometry height="30" width="260" x="560" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-11" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="Draft JSON">
+          <mxGeometry relative="1" x="0.1053" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="425" y="340" />
+              <mxPoint x="335" y="340" />
+            </Array>
+            <mxPoint x="425" y="280" as="sourcePoint" />
+            <mxPoint x="335" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;" value="3.1 Validate Options&#xa;(confirm_options)" vertex="1">
+          <mxGeometry height="40" width="140" x="110" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;" value="3.2 Define Criteria&#xa;(confirm_criteria)" vertex="1">
+          <mxGeometry height="40" width="140" x="260" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;" value="3.3 Classify Types&#xa;(confirm_criteria_types)" vertex="1">
+          <mxGeometry height="40" width="140" x="410" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;" value="3.4 Map Ordinal Scales&#xa;(confirm_ordinal_scales)" vertex="1">
+          <mxGeometry height="40" width="150" x="560" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" value="4.1 Importance Weighting&#xa;(get_weights_from_ranking)" vertex="1">
+          <mxGeometry height="50" width="200" x="310" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-17" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;" value="5.1 Descriptor-to-Numeric&#xa;(map_attributes)" vertex="1">
+          <mxGeometry height="50" width="200" x="310" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-18" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="Numeric Attributes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="410" y="620" />
+              <mxPoint x="280" y="620" />
+            </Array>
+            <mxPoint x="410" y="600" as="sourcePoint" />
+            <mxPoint x="280" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-19" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" value="6.1 engine: Normalization&#xa;(compute_weighted_scores)" vertex="1">
+          <mxGeometry height="50" width="180" x="200" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-20" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" value="6.2 engine: Weighted Sum&#xa;(compute_weighted_scores)" vertex="1">
+          <mxGeometry height="50" width="180" x="425" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;" value="7.1 Audit Payload Generator&#xa;(build_explanation_payload)" vertex="1">
+          <mxGeometry height="50" width="200" x="310" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-23" edge="1" parent="1" style="edgeStyle=none;dashed=1;dashPattern=8 8;html=1;strokeWidth=2;strokeColor=#FF0000;endArrow=none;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="40" y="830" as="sourcePoint" />
+            <mxPoint x="800" y="830" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-24" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#FF0000;fontStyle=1" value="AI USED ZONE (Generative LLM)" vertex="1">
+          <mxGeometry height="30" width="200" x="590" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-25" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="8.1 Natural Language Narrative&#xa;(render_explanation)" vertex="1">
+          <mxGeometry height="60" width="200" x="310" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-26" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;" value="9.1 post_result_menu" vertex="1">
+          <mxGeometry height="80" width="170" x="325" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-27" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;strokeColor=#0000FF;" value="[1] Re-rank Importance">
+          <mxGeometry relative="1" x="-0.8" as="geometry">
+            <Array as="points">
+              <mxPoint x="325" y="1050" />
+              <mxPoint x="80" y="1050" />
+              <mxPoint x="80" y="487" />
+            </Array>
+            <mxPoint x="320" y="1050" as="sourcePoint" />
+            <mxPoint x="310.02" y="487.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-28" edge="1" parent="1" source="x4eKHstcyK3xrmYSaq1v-26" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=1;entryY=0.5;strokeColor=#0000FF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="x4eKHstcyK3xrmYSaq1v-15" value="[3] Modify Structure">
+          <mxGeometry relative="1" x="-0.8" as="geometry">
+            <Array as="points">
+              <mxPoint x="775" y="1050" />
+              <mxPoint x="775" y="400" />
+            </Array>
+            <mxPoint x="500" y="1050" as="sourcePoint" />
+            <mxPoint x="725" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4eKHstcyK3xrmYSaq1v-29" edge="1" parent="1" source="x4eKHstcyK3xrmYSaq1v-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;entryX=1;entryY=0.5;entryPerimeter=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" value="[0] Finalize &amp; Exit">
+          <mxGeometry relative="1" x="0.0355" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="410" y="1130" />
+              <mxPoint x="860" y="1130" />
+              <mxPoint x="860" y="60" />
+            </Array>
+            <mxPoint x="410" y="1100" as="sourcePoint" />
+            <mxPoint x="450" y="60" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
