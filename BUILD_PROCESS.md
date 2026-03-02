@@ -1,5 +1,17 @@
 # Build Process
 
+
+## Build Process Overview
+
+| Required Explanation | Where It Is Covered |
+|---------------------|---------------------|
+| How I started | [Phase 1 – Initial Understanding & Static Prototype](#phase-1-initial-understanding--static-prototype) |
+| How my thinking evolved | [Phases 2–5](#phase-2-design-evolution--refinement) |
+| Alternative approaches considered | [Phases 2](#phase-2-design-evolution--refinement) & [4](#phase-4-critical-usability--model-flaw-discovery) |
+| Refactoring decisions | [Phases 6–8](#phase-6-refactoring-validation--stability) |
+| Mistakes and corrections | [Phases 4](#phase-4-critical-usability--model-flaw-discovery), [8](#phase-8-input-flow-corrections--ux-guardrails), [9](#phase-9-structure-agent-corrections--human-validation), and [10](#phase-10-ux-dead-ends-scale-editing--explanation-consistency) |
+| What changed during development and why | [Phases 5–10](#phase-5-revised-model--ai-assisted-structuring) |
+
 ## Phase 1: Initial Understanding & Static Prototype
 The goal was to build a Decision Companion System (DCS) that assists users in making better decisions by structuring trade-offs explicitly. The system was designed to prioritize deterministic logic over black-box AI recommendations to ensure transparency and trust.
 
@@ -54,7 +66,7 @@ Users consistently struggled to:
 Even when user intent was clear, outcomes often felt confusing or counterintuitive.
 This demonstrated that the problem was not user error, but a flawed assumption that humans can reliably perform normalization and scoring tasks.
 
-## Phase 5: Revised Model — AI-Assisted Structuring (Current Direction)
+## Phase 5: Revised Model — AI-Assisted Structuring 
 
 > Users should express intent and facts, not perform scoring or normalization.
 
@@ -131,45 +143,106 @@ The revised model:
 
 This preserves user control over priorities while removing unnecessary cognitive burden.
 
-### Role of AI in the Revised Model
+## Phase 6: Refactoring, Validation & Stability
 
-AI is introduced only as an assistive structuring layer, not as a decision-maker.
+As the system grew in complexity, multiple refactoring passes were required to restore clarity and correctness.
 
-**AI is used to:**
--   Interpret vague or unstructured user descriptions.
--   Convert natural language into structured, comparable attributes.
--   Assist users when they are unsure how to define options or criteria.
+Key refactoring decisions included:
+- Separated attribute conversion logic into a dedicated mapping layer
+- Isolated normalization and scoring into a single deterministic engine
+- Split explanation generation into:
+  - a factual explanation payload
+  - an optional AI-based natural language renderer
+- Reworking input helpers to prevent silent failures and skipped user input
 
-**AI explicitly does not:**
--   Assign weights.
--   Rank options.
--   Override user priorities.
--   Make final decisions.
+This phase focused less on adding features and more on making the system predictable, debuggable, and mathematically consistent.
 
-All decision logic remains deterministic and auditable.
 
-### Current State of the System
+## Phase 7: Stability, Missing Data Handling & User Control
+As the system was exercised with real inputs, a major concern emerged around missing or incomplete attribute data. In real-world decisions, users often do not know every value for every criterion, and forcing guesses would reduce trust.
 
-The system is now a functional, CLI-based Decision Companion System with a clear separation of responsibilities.
+### Design Decision: Missing Data Policy
+- If an option lacks a value for a specific criterion, that criterion is excluded for that option only.
+- The remaining weights are re-normalized, ensuring:
+    - **No artificial penalty** for honest uncertainty.
+    - **Mathematical correctness** and consistency.
+    - **Deterministic outcomes** that users can audit.
+- This approach preserves explainability while avoiding silent bias.
+- This behavior is applied per-option rather than globally, ensuring incomplete data does not distort the evaluation of fully specified options.
 
-#### Core Characteristics
--   **Core Engine:** Deterministic, explainable weighted scoring model.
--   **Normalization:** Proper handling of cost (lower is better) and benefit (higher is better) criteria.
--   **Architecture:** Modular separation between:
-    -   `core` — decision engine and validation logic
-    -   `utils` — user input and interaction helpers
--   **Decision Control:** User-defined priorities with system-managed normalization.
--   **AI Role:** Assistive interpretation only; no black-box decision-making.
+### Structural Limitation & Correction
+Initially, the options and criteria emitted by the Structure Agent were not editable, which contradicted the core philosophy of user control.
+- **Correction:** The workflow was restructured to explicitly allow user intervention at every step:
+    1. Multiline natural language user input.
+    2. AI Structure Agent (draft output).
+    3. **Confirm / Edit Options.**
+    4. **Confirm / Edit Criteria.**
+    5. **Confirm Cost vs. Benefit Classification.**
+    6. **Confirm or Define Ordinal Scales.**
+    7. Rank criteria by importance.
+    8. Attribute mapping and engine evaluation.
+- This ensured AI output remains **advisory, not authoritative**.
 
-#### Recent Technical Updates
--   Implemented normalization logic that correctly distinguishes between cost and benefit criteria.
--   Removed reliance on fixed rating-scale inversion.
--   Improved mathematical validity and interpretability of trade-offs.
--   Maintained full transparency: every score can be traced back to user inputs and deterministic rules.
--   Preserved a human-in-the-loop workflow where users retain full control over intent and priorities.
+## Phase 8: Input Flow Corrections & UX Guardrails
+Extensive CLI testing revealed several UX and flow issues that could lead to incorrect or misleading decisions.
 
-### Future Roadmap
--   **AI-Assisted Structuring:** Integrate LLMs to suggest criteria or options when users are uncertain or “stuck.”
--   **Persistence:** Enable saving, exporting, and revisiting past decision analyses.
--   **Visualization:** Add graphical breakdowns of scores and trade-offs for deeper insight.
--   **Testing:** Expand inline validation into a comprehensive `pytest` test suite.
+### Key Fixes & Improvements
+- **Pipeline Integrity:** Removed `prompt_missing_values` flows that were incompatible with the revised structured pipeline.
+- **State Propagation:** Fixed option and criterion editing so changes correctly propagate to attribute mapping, scoring, and explanation.
+- **UX Safety:** Added explicit warnings when users delete criteria that may affect ranking integrity.
+- **Criterion Definition:** Users must now explicitly choose "Benefit" or "Cost" and define units at the point of creation, preventing downstream semantic errors.
+
+## Phase 9: Structure Agent Corrections & Human Validation
+Relying solely on the LLM to infer "Cost vs. Benefit" semantics from natural language proved unreliable in edge cases.
+
+### Problem:
+- The Structure Agent sometimes misclassified criteria (e.g., "Distance" could be a cost for a commuter but a benefit for someone wanting a scenic drive).
+- Generated JSON lacked consistent semantic guarantees, leading to normalization errors.
+
+### Resolution:
+- **Human-in-the-Loop:** Classification was moved to an explicit user confirmation step.
+- The Structure Agent now only **suggests** a structure; the user **validates** the semantic meaning before scoring.
+
+## Phase 10: UX Dead Ends, Scale Editing & Explanation Consistency
+This phase addressed subtle logic failures that, while technically "correct," confused users or broke the explainability chain.
+
+### Ordinal Scale Refinement:
+- **The Issue**: Editing a proposed scale forced users into AI-generated paths, and ignored scales provided no warning about ranking impact.
+- **The Fix:** Users now have full control over scale definitions. Explicit warnings are shown for ignored criteria, and edited scales are re-mapped deterministically via the Attribute Mapper.
+
+### Ranking & Validation:
+- **Unique Ranking:** Prevented duplicate ranks to ensure a clear priority hierarchy.
+- **Visual Feedback:** Displayed the full criteria list during ranking to reduce cognitive load.
+- **Numeric Fallbacks:** Added validation for measurable criteria lacking numeric input, offering the choice to define an ordinal scale, auto-generate one, or ignore the criterion.
+
+### Explanation Pipeline Alignment:
+- **The Issue**: Mismatches between normalized internal keys (snake_case) and user-facing labels caused "missing data" flags in the Explanation Builder.
+- **The Fix:** Synchronized normalization across the engine, builder, and agent. The Explanation Agent now operates strictly on a pre-validated, auditable payload, ensuring the narrative matches the math perfectly.
+
+## Current System State
+The project has evolved into a robust, transparent **Decision Companion System** with the following characteristics:
+- **Stable Pipeline:** A reliable end-to-end flow from messy text to narrated results.
+- **Mathematical Rigor:** Deterministic rankings with proper handling of cost/benefit and missing data.
+- **User Agency:** AI is used strictly for assistance, with humans retaining final authority over all model parameters.
+- **Grounded Explanations:** Narratives that are mathematically honest and auditable.
+
+>Overall, the system evolved from a static scoring prototype into a flexible, user-controlled decision framework that remains deterministic, explainable, and resilient to real-world ambiguity.
+
+## Future Roadmap
+
+With the core architecture stabilized, future development will focus on expanding the system's depth and accessibility:
+
+### 1. Decision Persistence & Reusability
+Implement a lightweight persistence layer (e.g., SQLite) to allow users to save, name, and revisit past decisions, enabling long-term tracking of evolving priorities.
+
+### 2. Sensitivity & "What-If" Analysis
+Add tools to observe how adjusting a criterion's weight impacts rankings in real-time, helping users understand their confidence in the final result.
+
+### 3. Hard Constraints & Filtering
+Introduce optional "hard constraints" (e.g., maximum budget or minimum safety rating) to automatically filter non-viable options before the scoring engine begins.
+
+### 4. Enhanced Interface & Visualization
+Develop a web-based UI (e.g., React or Streamlit) to visualize score breakdowns and weight distributions through interactive charts (radar plots, stacked bar charts).
+
+### 5. Comprehensive Testing Suite
+Transition from inline assertions to a full `pytest` suite with mocked AI responses to ensure 100% coverage of mathematical and logical edge cases.

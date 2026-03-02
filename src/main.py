@@ -17,7 +17,7 @@ from utils.input_helpers import (
 )
 
 # 🔧 Debug flag - IF SET TO True-> it would be seen in terminal , IF SET TO False -> Hidden
-DEBUG = True
+DEBUG = False
 
 
 def debug_state(criteria, weights, mapped_attributes):
